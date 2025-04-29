@@ -32,6 +32,9 @@ productsRoute.openapi(
   async (c) => {
     const products = await prisma.product.findMany({
       orderBy: [{ id: "asc" }, { createdAt: "asc" }],
+      include: {
+        images: true,
+      },
     });
 
     return c.json(products);
@@ -94,11 +97,10 @@ productsRoute.openapi(
     },
     responses: {
       200: {
-        content: { "application/json": { schema: ProductResponseSchema } },
         description: "Get product by identifier",
+        content: { "application/json": { schema: ProductResponseSchema } },
       },
       404: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Product not found",
       },
       500: {
@@ -108,26 +110,32 @@ productsRoute.openapi(
     },
   }),
   async (c) => {
-    const { identifier } = c.req.valid("param");
+    try {
+      const { identifier } = c.req.valid("param");
 
-    const product = await prisma.product.findFirst({
-      where: {
-        OR: [{ id: identifier }, { slug: identifier }],
-      },
-      //   include: { productImage: true },
-    });
-
-    if (!product) {
-      return c.json(
-        {
-          error: "NotFound",
-          message: `Product with identifier '${identifier}' not found`,
+      const product = await prisma.product.findFirst({
+        where: {
+          OR: [{ id: identifier }, { slug: identifier }],
         },
-        404
-      );
-    }
+        include: {
+          images: true,
+        },
+      });
 
-    return c.json(product);
+      if (!product) {
+        return c.json(
+          {
+            error: "NotFound",
+            message: `Product with identifier '${identifier}' not found`,
+          },
+          404
+        );
+      }
+
+      return c.json(product);
+    } catch (error) {
+      return c.json({ message: "Failed to get product", error }, 500);
+    }
   }
 );
 
