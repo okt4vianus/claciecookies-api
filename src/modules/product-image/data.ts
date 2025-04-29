@@ -1,7 +1,6 @@
 export type ProductImage = {
-  name: String; // name of the image
+  name: string; // name of the image
   url: string; // url from google drive
-  productSlug: string; // related product slug
 };
 
 export type CreateProductImage = {
@@ -17,14 +16,14 @@ export type UpdateProductImage = {
 };
 
 // single product image
-export const exampleProductImage: ProductImage = {
+export const exampleProductImage: CreateProductImage = {
   name: "matcha-soft-cookies-1.jpg",
   url: "https://drive.google.com/uc?id=matcha-soft-cookies-1",
   productSlug: "matcha-soft-cookies",
 };
 
 // multiple product images
-export const exampleProductImages: ProductImage[] = [
+export const exampleProductImages: CreateProductImage[] = [
   {
     name: "matcha-soft-cookies-1.jpg",
     url: "https://drive.google.com/uc?id=matcha-soft-cookies-1",
