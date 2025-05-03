@@ -1,17 +1,31 @@
-import { exampleProducts } from "../src/modules/product/data";
-import { exampleProductImages } from "../src/modules/productImage/data";
+import { dataProducts } from "../src/modules/product/data";
+// import { exampleProductImages } from "../src/modules/productImage/data";
 import { PrismaClient } from "../src/generated/prisma";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  for (const productSeed of exampleProducts) {
-    const product = await prisma.product.upsert({
-      where: { slug: productSeed.slug },
-      update: productSeed,
-      create: productSeed,
+  for (const dataProduct of dataProducts) {
+    const upsertedProduct = await prisma.product.upsert({
+      where: { slug: dataProduct.slug },
+      update: {
+        ...dataProduct,
+        images: { connect: dataProduct.images },
+      },
+      create: {
+        ...dataProduct,
+        images: { create: dataProduct.images },
+      },
+      include: { images: true },
     });
-    console.info(`🍪 Product: ${product.name}`);
+
+    const imagesLog = upsertedProduct.images
+      .map((image) => image.name)
+      .join(" | ");
+
+    console.info(`
+      🍪 Product: ${upsertedProduct.name} (${upsertedProduct.slug})
+      🖼️  Images: ${imagesLog}`);
   }
 
   // for (const productImageSeed of exampleProductImages) {

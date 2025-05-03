@@ -1,12 +1,12 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { productsRoute } from "./modules/product/route";
-import { productImagesRoute } from "./modules/productImage/route";
+// import { productImagesRoute } from "./modules/product-image/route";
 
 const app = new OpenAPIHono();
 
 app.route("/products", productsRoute);
-app.route("/productImages", productImagesRoute);
+// app.route("/product-images", productImagesRoute);
 
 app.doc("/openapi.json", {
   openapi: "3.0.0",

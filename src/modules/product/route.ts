@@ -4,7 +4,7 @@ import {
   CreateProductSchema,
   ParamProductIdentifierSchema,
   ParamProductIdSchema,
-  ProductResponseSchema,
+  OneProductResponseSchema,
   ProductsResponseSchema,
   UpdatePatchProductSchema,
 } from "./schema";
@@ -32,9 +32,57 @@ productsRoute.openapi(
   async (c) => {
     const products = await prisma.product.findMany({
       orderBy: [{ id: "asc" }, { createdAt: "asc" }],
+      include: { images: true },
     });
 
     return c.json(products);
+  }
+);
+
+// ✅ GET /products/:identifier
+productsRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Get product by identifier (ID or slug)",
+    method: "get",
+    path: "/:identifier",
+    request: {
+      params: ParamProductIdentifierSchema,
+    },
+    responses: {
+      200: {
+        content: { "application/json": { schema: OneProductResponseSchema } },
+        description: "Get product by identifier",
+      },
+      404: {
+        // content: { "applicati on/json": { schema: ErrorResponseSchema } },
+        description: "Product not found",
+      },
+      500: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const { identifier } = c.req.valid("param");
+
+      const product = await prisma.product.findFirst({
+        where: {
+          OR: [{ id: identifier }, { slug: identifier }],
+        },
+        include: { images: true },
+      });
+
+      if (!product) {
+        return c.notFound();
+      }
+
+      return c.json(product);
+    } catch (error) {
+      return c.json({ message: "Failed to get product", error }, 500);
+    }
   }
 );
 
@@ -52,7 +100,7 @@ productsRoute.openapi(
     },
     responses: {
       201: {
-        content: { "application/json": { schema: ProductResponseSchema } },
+        content: { "application/json": { schema: OneProductResponseSchema } },
         description: "Product created successfully",
       },
       500: {
@@ -69,6 +117,9 @@ productsRoute.openapi(
         data: {
           ...body,
           slug: body.slug ?? createNewSlug(body.name),
+          images: {
+            create: body.images,
+          },
         },
       });
 
@@ -79,55 +130,6 @@ productsRoute.openapi(
         500
       );
     }
-  }
-);
-
-// ✅ GET /products/:identifier
-productsRoute.openapi(
-  createRoute({
-    tags,
-    summary: "Get product by identifier (ID or slug)",
-    method: "get",
-    path: "/:identifier",
-    request: {
-      params: ParamProductIdentifierSchema,
-    },
-    responses: {
-      200: {
-        content: { "application/json": { schema: ProductResponseSchema } },
-        description: "Get product by identifier",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
-        description: "Product not found",
-      },
-      500: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
-        description: "Internal server error",
-      },
-    },
-  }),
-  async (c) => {
-    const { identifier } = c.req.valid("param");
-
-    const product = await prisma.product.findFirst({
-      where: {
-        OR: [{ id: identifier }, { slug: identifier }],
-      },
-      //   include: { productImage: true },
-    });
-
-    if (!product) {
-      return c.json(
-        {
-          error: "NotFound",
-          message: `Product with identifier '${identifier}' not found`,
-        },
-        404
-      );
-    }
-
-    return c.json(product);
   }
 );
 
@@ -146,7 +148,7 @@ productsRoute.openapi(
     },
     responses: {
       200: {
-        content: { "application/json": { schema: ProductResponseSchema } },
+        content: { "application/json": { schema: OneProductResponseSchema } },
         description: "Product updated successfully",
       },
       404: {
@@ -163,11 +165,14 @@ productsRoute.openapi(
     try {
       const { id } = c.req.valid("param");
       const body = c.req.valid("json");
+
+      const { images, ...dataProduct } = body;
+
       const updatedProduct = await prisma.product.update({
         where: { id },
         data: {
-          ...body,
-          slug: body.slug ?? createNewSlug(body.name ?? ""),
+          ...dataProduct,
+          slug: body.slug ?? createNewSlug(dataProduct.name ?? ""),
         },
       });
 

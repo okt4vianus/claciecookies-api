@@ -1,33 +1,36 @@
 import { z } from "zod";
+import {
+  CreateProductImageSchema,
+  ProductImageSchema,
+} from "../product-image/schema";
 
-// Schema Create Product (name, price, required)
-export const CreateProductSchema = z.object({
+export const ProductSchema = z.object({
+  id: z.string(),
   name: z.string().min(3, "Name is required"),
-  slug: z.string().min(3).optional(),
-  description: z.string().optional(),
+  slug: z.string(),
+  description: z.string(),
   price: z.number().int().positive("Price must be a positive number"),
   stockQuantity: z
     .number()
     .int()
-    .positive("Stock quantity must be a positive number"),
+    .nonnegative("Stock quantity must be more than or equal to 0"),
+  images: z.array(ProductImageSchema).optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
 });
 
-//   Schema Update Patch Product (all field optional)
-export const UpdatePatchProductSchema = z.object({
-  name: z.string().min(3).optional(),
-  slug: z.string().min(3).optional(),
-  description: z.string().optional(),
-  price: z
-    .number()
-    .int()
-    .positive("Price must be a positive number")
-    .optional(),
-  stockQuantity: z
-    .number()
-    .int()
-    .positive("Stock quantity must be a positive number")
+export const CreateProductSchema = ProductSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  slug: z.string().optional(),
+  images: z
+    .array(ProductImageSchema.pick({ name: true, url: true }))
     .optional(),
 });
+
+export const UpdatePatchProductSchema = ProductSchema.partial();
 
 export const ParamProductIdSchema = z.object({
   id: z.string().min(3, "Product ID is required"),
@@ -45,16 +48,6 @@ export const QuerySearchProductSchema = z.object({
   q: z.string().min(3, "Search query is required"),
 });
 
-// Schema for response
-export const ProductResponseSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  slug: z.string(),
-  description: z.string().nullable(),
-  price: z.number(),
-  stockQuantity: z.number(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-});
+export const OneProductResponseSchema = ProductSchema;
 
-export const ProductsResponseSchema = z.array(ProductResponseSchema);
+export const ProductsResponseSchema = z.array(ProductSchema);
