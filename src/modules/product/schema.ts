@@ -8,7 +8,7 @@ export const ProductSchema = z.object({
   id: z.string(),
   name: z.string().min(3, "Name is required"),
   slug: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   price: z.number().int().positive("Price must be a positive number"),
   stockQuantity: z
     .number()
