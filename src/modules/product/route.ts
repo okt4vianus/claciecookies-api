@@ -6,7 +6,8 @@ import {
   ParamProductIdSchema,
   OneProductResponseSchema,
   ProductsResponseSchema,
-  UpdatePatchProductSchema,
+  UpdateProductSchema,
+  ProductSchema,
 } from "./schema";
 import { prisma } from "../../lib/prisma";
 import { ErrorResponseSchema, SuccessResponseSchema } from "../common/schema";
@@ -55,7 +56,7 @@ productsRoute.openapi(
         description: "Get product by identifier",
       },
       404: {
-        // content: { "applicati on/json": { schema: ErrorResponseSchema } },
+        // content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Product not found",
       },
       500: {
@@ -79,7 +80,7 @@ productsRoute.openapi(
         return c.notFound();
       }
 
-      return c.json(product);
+      return c.json(product, 200);
     } catch (error) {
       return c.json({ message: "Failed to get product", error }, 500);
     }
@@ -143,7 +144,7 @@ productsRoute.openapi(
     request: {
       params: ParamProductIdSchema,
       body: {
-        content: { "application/json": { schema: UpdatePatchProductSchema } },
+        content: { "application/json": { schema: UpdateProductSchema } },
       },
     },
     responses: {
@@ -173,6 +174,10 @@ productsRoute.openapi(
         data: {
           ...dataProduct,
           slug: body.slug ?? createNewSlug(dataProduct.name ?? ""),
+          images: {
+            deleteMany: {},
+            create: images,
+          },
         },
       });
 
@@ -224,12 +229,8 @@ productsRoute.openapi(
     request: { params: ParamProductIdSchema },
     responses: {
       200: {
-        content: { "application/json": { schema: SuccessResponseSchema } },
+        content: { "application/json": { schema: OneProductResponseSchema } },
         description: "Product deleted successfully",
-      },
-      404: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
-        description: "Product not found",
       },
       500: {
         content: { "application/json": { schema: ErrorResponseSchema } },
@@ -240,12 +241,13 @@ productsRoute.openapi(
   async (c) => {
     try {
       const { id } = c.req.valid("param");
-      const deleteProduct = await prisma.product.delete({ where: { id } });
 
-      return c.json({
-        message: `Product with ID ${id} has been deleted`,
-        data: deleteProduct,
+      const deletedProduct = await prisma.product.delete({
+        where: { id },
+        include: { images: true },
       });
+
+      return c.json(deletedProduct, 200);
     } catch (error) {
       return c.json({ error: "Failed to delete product", details: error }, 500);
     }

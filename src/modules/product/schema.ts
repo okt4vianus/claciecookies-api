@@ -30,7 +30,7 @@ export const CreateProductSchema = ProductSchema.omit({
     .optional(),
 });
 
-export const UpdatePatchProductSchema = ProductSchema.partial();
+export const UpdateProductSchema = CreateProductSchema.partial();
 
 export const ParamProductIdSchema = z.object({
   id: z.string().min(3, "Product ID is required"),
