@@ -5,8 +5,8 @@ import {
   ParamProductIdentifierSchema,
   ParamProductIdSchema,
   OneProductResponseSchema,
-  ProductsResponseSchema,
-  UpdatePatchProductSchema,
+  ManyProductsResponseSchema,
+  UpsertProductSchema,
 } from "./schema";
 import { prisma } from "../../lib/prisma";
 import { ErrorResponseSchema, SuccessResponseSchema } from "../common/schema";
@@ -24,7 +24,7 @@ productsRoute.openapi(
     path: "/",
     responses: {
       200: {
-        content: { "application/json": { schema: ProductsResponseSchema } },
+        content: { "application/json": { schema: ManyProductsResponseSchema } },
         description: "Get all products",
       },
     },
@@ -117,10 +117,9 @@ productsRoute.openapi(
         data: {
           ...body,
           slug: body.slug ?? createNewSlug(body.name),
-          images: {
-            create: body.images,
-          },
+          images: { create: body.images },
         },
+        include: { images: true },
       });
 
       return c.json(product, 201);
@@ -143,7 +142,7 @@ productsRoute.openapi(
     request: {
       params: ParamProductIdSchema,
       body: {
-        content: { "application/json": { schema: UpdatePatchProductSchema } },
+        content: { "application/json": { schema: UpsertProductSchema } },
       },
     },
     responses: {
@@ -174,6 +173,7 @@ productsRoute.openapi(
           ...dataProduct,
           slug: body.slug ?? createNewSlug(dataProduct.name ?? ""),
         },
+        include: { images: true },
       });
 
       return c.json(updatedProduct, 200);

@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   CreateProductImageSchema,
   ProductImageSchema,
+  UpsertProductImageSchema,
 } from "../product-image/schema";
 
 export const ProductSchema = z.object({
@@ -25,12 +26,20 @@ export const CreateProductSchema = ProductSchema.omit({
   updatedAt: true,
 }).extend({
   slug: z.string().optional(),
-  images: z
-    .array(ProductImageSchema.pick({ name: true, url: true }))
-    .optional(),
+  images: z.array(UpsertProductImageSchema).optional(),
 });
 
-export const UpdatePatchProductSchema = ProductSchema.partial();
+export const UpsertProductSchema = CreateProductSchema.partial();
+
+// export const UpsertProductSchema = ProductSchema.partial()
+//   .omit({
+//     id: true,
+//     createdAt: true,
+//     updatedAt: true,
+//   })
+//   .extend({
+//     images: z.array(UpsertProductImageSchema).optional(),
+//   });
 
 export const ParamProductIdSchema = z.object({
   id: z.string().min(3, "Product ID is required"),
@@ -50,4 +59,4 @@ export const QuerySearchProductSchema = z.object({
 
 export const OneProductResponseSchema = ProductSchema;
 
-export const ProductsResponseSchema = z.array(ProductSchema);
+export const ManyProductsResponseSchema = z.array(ProductSchema);
