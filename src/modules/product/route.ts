@@ -172,6 +172,10 @@ productsRoute.openapi(
         data: {
           ...dataProduct,
           slug: body.slug ?? createNewSlug(dataProduct.name ?? ""),
+          // images: {
+          //   deleteMany: {},
+          //   create: images,
+          // },
         },
         include: { images: true },
       });
@@ -224,13 +228,13 @@ productsRoute.openapi(
     request: { params: ParamProductIdSchema },
     responses: {
       200: {
-        content: { "application/json": { schema: SuccessResponseSchema } },
+        content: { "application/json": { schema: OneProductResponseSchema } },
         description: "Product deleted successfully",
       },
-      404: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
-        description: "Product not found",
-      },
+      // 404: {
+      //   content: { "application/json": { schema: ErrorResponseSchema } },
+      //   description: "Product not found",
+      // },
       500: {
         content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Internal server error",
@@ -240,12 +244,17 @@ productsRoute.openapi(
   async (c) => {
     try {
       const { id } = c.req.valid("param");
-      const deleteProduct = await prisma.product.delete({ where: { id } });
-
-      return c.json({
-        message: `Product with ID ${id} has been deleted`,
-        data: deleteProduct,
+      // const deletedProduct = await prisma.product.delete({ where: { id } });
+      const deletedProduct = await prisma.product.delete({
+        where: { id },
+        include: { images: true },
       });
+
+      return c.json(deletedProduct, 200);
+      // return c.json({
+      //   message: `Product with ID ${id} has been deleted`,
+      //   data: deletedProduct,
+      // });
     } catch (error) {
       return c.json({ error: "Failed to delete product", details: error }, 500);
     }
