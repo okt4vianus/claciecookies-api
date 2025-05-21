@@ -3,6 +3,7 @@ import { RegisterBodySchema, UsersSchema } from "./schema";
 import { prisma } from "../../lib/prisma";
 import { ErrorResponseSchema } from "../common/schema";
 import { UserSchema } from "../../generated/zod";
+import { hashPassword } from "../../lib/password";
 
 export const authRoute = new OpenAPIHono();
 
@@ -35,8 +36,13 @@ authRoute.openapi(
       const body = c.req.valid("json");
       const { password, ...userData } = body;
 
+      const hash = await hashPassword(password);
+
       const newUser = await prisma.user.create({
-        data: userData,
+        data: {
+          ...userData,
+          password: { create: { hash } },
+        },
       });
 
       return c.json(newUser);
