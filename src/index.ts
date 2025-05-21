@@ -1,13 +1,15 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
+
 import { productsRoute } from "./modules/product/route";
 import { usersRoute } from "./modules/user/route";
+import { authRoute } from "./modules/auth/route";
 
 const app = new OpenAPIHono();
 
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
-// app.route("/auth", authRoute);
+app.route("/auth", authRoute);
 
 app.doc("/openapi.json", {
   openapi: "3.0.0",
