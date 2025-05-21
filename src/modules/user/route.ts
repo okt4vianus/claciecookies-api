@@ -35,7 +35,7 @@ usersRoute.openapi(
 usersRoute.openapi(
   createRoute({
     tags,
-    summary: "Get user by identifier (ID or username)",
+    summary: "Get user by username",
     method: "get",
     path: "/:username",
     request: {
