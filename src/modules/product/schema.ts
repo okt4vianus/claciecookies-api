@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  CreateProductImageSchema,
   ProductImageSchema,
   UpsertProductImageSchema,
 } from "../product-image/schema";
