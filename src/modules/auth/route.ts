@@ -4,6 +4,7 @@ import { prisma } from "../../lib/prisma";
 import { ErrorResponseSchema } from "../common/schema";
 import { UserSchema } from "../../generated/zod";
 import { comparePassword, hashPassword } from "../../lib/password";
+import { signToken } from "../../lib/token";
 
 export const authRoute = new OpenAPIHono();
 
@@ -106,7 +107,10 @@ authRoute.openapi(
 
       const { password: _, ...userWithoutPassword } = user;
 
-      return c.json(userWithoutPassword);
+      const token = await signToken(userWithoutPassword.id);
+
+      c.header("Token", token);
+      return c.json({ token });
     } catch (error) {
       return c.json({ message: "User login failed", error: error }, 500);
     }
