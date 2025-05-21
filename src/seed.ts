@@ -1,6 +1,5 @@
-import { dataProducts } from "../src/modules/product/data";
-// import { exampleProductImages } from "../src/modules/productImage/data";
-import { PrismaClient } from "../src/generated/prisma";
+import { dataProducts } from "./modules/product/data";
+import { PrismaClient } from "./generated/prisma";
 
 const prisma = new PrismaClient();
 
