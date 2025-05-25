@@ -4,6 +4,7 @@ import { ErrorResponseSchema, SuccessResponseSchema } from "../common/schema";
 import { LoginBodySchema, RegisterBodySchema } from "./schema";
 import { UserSchema } from "../../generated/zod";
 import { hashPassword, verifyPassword } from "../../lib/password";
+import { signToken } from "../../lib/token";
 
 export const authRoute = new OpenAPIHono();
 
@@ -58,7 +59,7 @@ authRoute.openapi(
   }
 );
 
-// ✅ POST /auth/login
+// // ✅ POST /auth/login
 authRoute.openapi(
   createRoute({
     tags,
@@ -70,13 +71,14 @@ authRoute.openapi(
         content: { "application/json": { schema: LoginBodySchema } },
       },
     },
+
     responses: {
       201: {
         content: { "application/json": { schema: UserSchema } },
-        description: "User loggd in successfully",
+        description: "User logged in successfully",
       },
       400: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
+        // content: { "application/json": { schema: ErrorResponseSchema } },
         description: "User login failed",
       },
       500: {
@@ -116,7 +118,14 @@ authRoute.openapi(
       // Remove password from the response
       const { password: _, ...userWithoutPassword } = user;
 
-      return c.json(userWithoutPassword, 201);
+      const token = await signToken(userWithoutPassword.id);
+      if (!token) {
+        return c.json({ message: "Failed to generate token" }, 500);
+      }
+
+      c.header("Token", token);
+
+      return c.json({ user: userWithoutPassword }, 201);
     } catch (error) {
       return c.json({ message: "User login failed", details: error }, 500);
     }
