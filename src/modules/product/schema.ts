@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  CreateProductImageSchema,
   ProductImageSchema,
   UpsertProductImageSchema,
 } from "../product-image/schema";
@@ -30,16 +29,6 @@ export const CreateProductSchema = ProductSchema.omit({
 });
 
 export const UpsertProductSchema = CreateProductSchema.partial();
-
-// export const UpsertProductSchema = ProductSchema.partial()
-//   .omit({
-//     id: true,
-//     createdAt: true,
-//     updatedAt: true,
-//   })
-//   .extend({
-//     images: z.array(UpsertProductImageSchema).optional(),
-//   });
 
 export const ParamProductIdSchema = z.object({
   id: z.string().min(3, "Product ID is required"),
