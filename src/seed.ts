@@ -1,6 +1,6 @@
-import { dataProducts } from "../src/modules/product/data";
+import { dataProducts } from "./modules/product/data";
 // import { exampleProductImages } from "../src/modules/productImage/data";
-import { PrismaClient } from "../src/generated/prisma";
+import { PrismaClient } from "./generated/prisma";
 
 const prisma = new PrismaClient();
 
@@ -21,7 +21,7 @@ async function main() {
 
     const imagesLog = upsertedProduct.images
       .map((image) => image.name)
-      .join(" | ");
+      .join("\n \t\t");
 
     console.info(`
       🍪 Product: ${upsertedProduct.name} (${upsertedProduct.slug})

@@ -222,4 +222,18 @@ export const dataProducts: Product[] = [
       },
     ],
   },
+  {
+    slug: "risol-mayonnaise",
+    name: "Risol Mayonnaise",
+    description:
+      "Risol Mayonaise adalah camilan gurih dengan isian lezat yang creamy dan segar. Setiap gigitan menggabungkan tekstur renyah kulit risol yang digoreng sempurna dengan isian mayo yang kaya rasa, ditambah sentuhan sayuran segar dan potongan daging atau ayam pilihan. Cocok sebagai teman santai, bekal praktis, atau sajian istimewa di berbagai kesempatan. Nikmati kelezatan yang menggoda dan sensasi creamy yang bikin ketagihan! with a rich brownie bottom and creamy top",
+    price: 20000,
+    stockQuantity: 7,
+    images: [
+      {
+        name: "risol-mayo",
+        url: "https://ucarecdn.com/3c81c655-a355-4782-ae2f-d87466ad4af8/",
+      },
+    ],
+  },
 ];

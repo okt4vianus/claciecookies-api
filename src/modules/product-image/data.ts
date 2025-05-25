@@ -135,4 +135,9 @@ export const dataProductImages: ProductImage[] = [
     url: "https://ucarecdn.com/2122246c-4a7f-456b-ab11-132e9488324c/",
     productSlug: "brownie-bottom-cheesecake",
   },
+  {
+    name: "risol-mayo",
+    url: "https://ucarecdn.com/3c81c655-a355-4782-ae2f-d87466ad4af8/",
+    productSlug: "risol-mayonnaise",
+  },
 ];
