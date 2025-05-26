@@ -1,7 +1,11 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { ParamUserIdentifierSchema, UsersSchema } from "./schema";
+import {
+  ParamUserIdentifierSchema,
+  PublicUserSchema,
+  PublicUsersSchema,
+} from "./schema";
 import { prisma } from "../../lib/prisma";
-import { ErrorResponseSchema, SuccessResponseSchema } from "../common/schema";
+import { ErrorResponseSchema } from "../common/schema";
 import { UserSchema } from "../../generated/zod";
 
 export const usersRoute = new OpenAPIHono();
@@ -17,7 +21,7 @@ usersRoute.openapi(
     path: "/",
     responses: {
       200: {
-        content: { "application/json": { schema: UsersSchema } },
+        content: { "application/json": { schema: PublicUsersSchema } },
         description: "Get all users",
       },
     },
@@ -25,6 +29,7 @@ usersRoute.openapi(
   async (c) => {
     const users = await prisma.user.findMany({
       orderBy: [{ id: "asc" }, { createdAt: "asc" }],
+      omit: { email: true },
     });
 
     return c.json(users);
@@ -43,16 +48,16 @@ usersRoute.openapi(
     },
     responses: {
       200: {
-        content: { "application/json": { schema: UserSchema } },
         description: "Get user by identifier",
+        content: { "application/json": { schema: PublicUserSchema } },
       },
       404: {
-        // content: { "application/json": { schema: ErrorResponseSchema } },
         description: "User not found",
+        // content: { "application/json": { schema: ErrorResponseSchema } },
       },
       500: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Internal server error",
+        content: { "application/json": { schema: ErrorResponseSchema } },
       },
     },
   }),
@@ -61,14 +66,11 @@ usersRoute.openapi(
       const { identifier } = c.req.valid("param");
 
       const user = await prisma.user.findFirst({
-        where: {
-          OR: [{ id: identifier }, { username: identifier }],
-        },
+        where: { OR: [{ id: identifier }, { username: identifier }] },
+        omit: { email: true },
       });
 
-      if (!user) {
-        return c.notFound();
-      }
+      if (!user) return c.notFound();
 
       return c.json(user);
     } catch (error) {

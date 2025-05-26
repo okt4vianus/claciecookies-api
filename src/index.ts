@@ -13,14 +13,21 @@ app.route("/auth", authRoute);
 
 // app.route("/product-images", productImagesRoute);
 
-app.doc("/openapi.json", {
-  openapi: "3.0.0",
-  info: {
-    version: "1.0.0",
-    title: "Clacie Cookies API",
-    description: "API Documentation for Clacie Cookies",
-  },
-});
+app
+  .doc("/openapi.json", {
+    openapi: "3.0.0",
+    info: {
+      version: "1.0.0",
+      title: "Clacie Cookies API",
+      description: "API Documentation for Clacie Cookies",
+    },
+  })
+  .openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+    type: "http",
+    scheme: "bearer",
+    in: "header",
+    // Authorization: Bearer <token>
+  });
 
 // Add API reference page
 app.get(
