@@ -39,13 +39,13 @@ productsRoute.openapi(
   }
 );
 
-// ✅ GET /products/:identifier
+// ✅ GET /products/{identifier}
 productsRoute.openapi(
   createRoute({
     tags,
     summary: "Get product by identifier (ID or slug)",
     method: "get",
-    path: "/:identifier",
+    path: "/{identifier}",
     request: {
       params: ParamProductIdentifierSchema,
     },
@@ -132,13 +132,13 @@ productsRoute.openapi(
   }
 );
 
-// ✅ PATCH /products/:id
+// ✅ PATCH /products/{id}
 productsRoute.openapi(
   createRoute({
     tags,
     summary: "Update a product by ID",
     method: "patch",
-    path: "/:id",
+    path: "/{id}",
     request: {
       params: ParamProductIdSchema,
       body: {
@@ -218,13 +218,13 @@ productsRoute.openapi(
   }
 );
 
-// ✅ DELETE /products/:id
+// ✅ DELETE /products/{id}
 productsRoute.openapi(
   createRoute({
     tags,
     summary: "Delete a product by ID",
     method: "delete",
-    path: "/:id",
+    path: "/{id}",
     request: { params: ParamProductIdSchema },
     responses: {
       200: {
