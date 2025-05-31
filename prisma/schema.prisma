@@ -12,12 +12,12 @@ datasource db {
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
-  output          = "../src/generated/prisma"
+  output          = "~/generated/prisma"
 }
 
 generator zod {
   provider = "zod-prisma-types"
-  output   = "../src/generated/zod"
+  output   = "~/generated/zod"
 }
 
 model User {

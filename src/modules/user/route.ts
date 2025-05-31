@@ -1,8 +1,11 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { ParamUserIdentifierSchema, UsersSchema } from "./schema";
-import { prisma } from "../../lib/prisma";
-import { ErrorResponseSchema, SuccessResponseSchema } from "../common/schema";
-import { UserSchema } from "../../generated/zod";
+import { prisma } from "~/lib/prisma";
+import { ErrorResponseSchema } from "~/modules/common/schema";
+import {
+  ParamUserIdentifierSchema,
+  PublicUserSchema,
+  PublicUsersSchema,
+} from "~/modules/user/schema";
 
 export const usersRoute = new OpenAPIHono();
 
@@ -17,7 +20,7 @@ usersRoute.openapi(
     path: "/",
     responses: {
       200: {
-        content: { "application/json": { schema: UsersSchema } },
+        content: { "application/json": { schema: PublicUsersSchema } },
         description: "Get all users",
       },
     },
@@ -25,6 +28,7 @@ usersRoute.openapi(
   async (c) => {
     const users = await prisma.user.findMany({
       orderBy: [{ id: "asc" }, { createdAt: "asc" }],
+      omit: { email: true },
     });
 
     return c.json(users);
@@ -43,7 +47,7 @@ usersRoute.openapi(
     },
     responses: {
       200: {
-        content: { "application/json": { schema: UserSchema } },
+        content: { "application/json": { schema: PublicUserSchema } },
         description: "Get user by identifier",
       },
       404: {
@@ -64,6 +68,7 @@ usersRoute.openapi(
         where: {
           OR: [{ id: identifier }, { username: identifier }],
         },
+        omit: { email: true }, // Omit email for public user data
       });
 
       if (!user) {

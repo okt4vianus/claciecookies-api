@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   ProductImageSchema,
   UpsertProductImageSchema,
-} from "../product-image/schema";
+} from "~/modules/product-image/schema";
 
 export const ProductSchema = z.object({
   id: z.string(),

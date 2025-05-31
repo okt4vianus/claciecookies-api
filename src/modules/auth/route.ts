@@ -1,16 +1,17 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "../../lib/prisma";
-import { ErrorResponseSchema, SuccessResponseSchema } from "../common/schema";
-import { LoginBodySchema, RegisterBodySchema } from "./schema";
-import { UserSchema } from "../../generated/zod";
-import { hashPassword, verifyPassword } from "../../lib/password";
-import { signToken } from "../../lib/token";
+import { UserSchema } from "~/generated/zod";
+import { hashPassword, verifyPassword } from "~/lib/password";
+import { prisma } from "~/lib/prisma";
+import { signToken } from "~/lib/token";
+import { checkAuthorized } from "~/modules/auth/middleware";
+import { ErrorResponseSchema } from "~/modules/common/schema";
+import { LoginBodySchema, RegisterBodySchema } from "~/modules/auth/schema";
 
 export const authRoute = new OpenAPIHono();
 
 const tags = ["Auth"];
 
-// ✅ POST /auth/register
+// POST /auth/register
 authRoute.openapi(
   createRoute({
     tags,
@@ -59,7 +60,7 @@ authRoute.openapi(
   }
 );
 
-// // ✅ POST /auth/login
+// POST /auth/login
 authRoute.openapi(
   createRoute({
     tags,
@@ -125,9 +126,46 @@ authRoute.openapi(
 
       c.header("Token", token);
 
-      return c.json({ user: userWithoutPassword }, 201);
+      return c.json({ token, user: userWithoutPassword }, 201);
     } catch (error) {
       return c.json({ message: "User login failed", details: error }, 500);
+    }
+  }
+);
+
+// GET /auth/me
+authRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Check authenticated user and if authorized",
+    method: "get",
+    path: "/me",
+    security: [{ BearerAuth: [] }], // OpenAPI security scheme
+    middleware: checkAuthorized, // Actual logic process- Custom middleware to check authorization
+    responses: {
+      200: {
+        description: "Successfully check authenticated user",
+        content: { "application/json": { schema: UserSchema } },
+      },
+      500: {
+        description: "Failed to check authenticated user",
+        // content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+      if (!user) {
+        return c.json({ message: "User not found" }, 404);
+      }
+      return c.json(user, 200);
+    } catch (error) {
+      console.error("Error checking authenticated user:", error);
+      return c.json(
+        { message: "Failed to  authenticated user", details: error },
+        500
+      );
     }
   }
 );

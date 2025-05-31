@@ -1,5 +1,4 @@
 import { z } from "@hono/zod-openapi";
-import { OneProductResponseSchema } from "../product/schema";
 
 export const ProductImageSchema = z.object({
   id: z.string(),
