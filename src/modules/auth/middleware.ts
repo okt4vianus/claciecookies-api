@@ -31,12 +31,10 @@ export const checkAuthorized = createMiddleware<Env>(async (c, next) => {
     return c.json({ message: "Token not found" }, 401);
   }
 
-  const payload = (await verifyToken(token)) as AuthTokenPayload;
+  const payload = await verifyToken(token);
   if (!payload) {
     return c.json({ message: "Invalid token" }, 401);
   }
-
-  console.log({ payload });
 
   const user = await prisma.user.findUnique({
     where: { id: payload.sub },
