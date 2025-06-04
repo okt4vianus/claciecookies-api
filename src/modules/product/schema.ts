@@ -20,14 +20,7 @@ import { ProductSchema as BaseProductSchema } from "~/generated/zod";
 //   updatedAt: z.date(),
 // });
 
-export const ProductSchema = BaseProductSchema.omit({
-  name: true,
-  description: true,
-  price: true,
-  stockQuantity: true,
-  createdAt: true,
-  updatedAt: true,
-}).extend({
+export const ProductSchema = BaseProductSchema.extend({
   name: z.string().min(3, "Name is required"),
   description: z.string().optional(),
   price: z.number().int().positive("Price must be a positive number"),
@@ -36,14 +29,10 @@ export const ProductSchema = BaseProductSchema.omit({
     .int()
     .nonnegative("Stock quantity must be more than or equal to 0"),
   images: z.array(ProductImageSchema).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export const CreateProductSchema = ProductSchema.omit({
   id: true,
-  createdAt: true,
-  updatedAt: true,
 }).extend({
   slug: z.string().optional(),
   images: z.array(UpsertProductImageSchema).optional(),
