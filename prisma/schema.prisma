@@ -31,13 +31,17 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Cart      Cart?
 }
 
 model Password {
-  id        String   @id @default(ulid())
-  hash      String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String   @unique
+  id String @id @default(ulid())
+
+  hash String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -45,13 +49,15 @@ model Password {
 model Product {
   id String @id @default(ulid())
 
-  slug String @unique // matcha-soft-cookies
-  name String @unique // Matcha Soft Cookies
+  slug        String @unique // matcha-soft-cookies
+  name        String @unique // Matcha Soft Cookies
+  description String @default("Belum ada deskripsi.") @db.Text // Matcha soft cookies with a hint of green tea
+  price       Int // Rupiah/IDR
 
-  description   String         @default("Belum ada deskripsi.") @db.Text // Matcha soft cookies with a hint of green tea
-  price         Int // Rupiah/IDR
   images        ProductImage[]
   stockQuantity Int
+
+  CartItem CartItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -65,6 +71,37 @@ model ProductImage {
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   productId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart {
+  id String @id @default(ulid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  items CartItem[]
+
+  totalPrice Int @default(0) // Total price of all items in the cart
+  // totalQuantity Int @default(0) // Total quantity of all items in the cart
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+  id String @id @default(ulid())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  quantity      Int @default(1) // Quantity of the product in the cart item
+  subTotalPrice Int @default(0) // Subtotal price of the cart item (quantity * product price)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
