@@ -12,3 +12,8 @@ export const CartItemSchema = BaseCartItemSchema.extend({
 export const CartSchema = BaseCartSchema.extend({
   items: z.array(CartItemSchema),
 });
+
+export const AddProductToCartSchema = z.object({
+  productId: z.string(),
+  quantity: z.number(),
+});
