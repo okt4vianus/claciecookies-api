@@ -6,7 +6,7 @@ import {
   CartItemSchema,
   CartSchema,
 } from "~/modules/cart/schema";
-import { ErrorResponseSchema } from "../common/schema";
+import { ErrorResponseSchema } from "~/modules/common/schema";
 
 export const cartRoute = new OpenAPIHono();
 
@@ -71,11 +71,15 @@ cartRoute.openapi(
     responses: {
       200: {
         content: { "application/json": { schema: CartItemSchema } },
-        description: "Product updated in cart successfully",
+        description: "Successfully update product in cart",
       },
       201: {
         content: { "application/json": { schema: CartItemSchema } },
-        description: "Product added to cart successfully",
+        description: "Successfully add product to cart",
+      },
+      400: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Failed to add product to cart",
       },
       500: {
         content: { "application/json": { schema: ErrorResponseSchema } },
@@ -84,8 +88,7 @@ cartRoute.openapi(
     },
   }),
   async (c) => {
-    // Calculate subTotal and total
-    // Get product data before calculate
+    // Calculate subTotalPrice and totalPrice
 
     try {
       const user = c.get("user");
@@ -95,13 +98,24 @@ cartRoute.openapi(
         where: { userId: user.id },
         include: { items: true },
       });
-      if (!cart) throw new Error("No user's cart");
+      if (!cart) throw new Error("No user's cart found");
 
-      // Find existing cart item with the same product
+      const product = await prisma.product.findUnique({
+        where: { id: body.productId },
+      });
+      if (!product) throw new Error("No product found");
+
+      const hasEnoughStock = product.stockQuantity >= body.quantity;
+      if (!hasEnoughStock) {
+        return c.json(
+          { message: "The quantity is larger than available stock." },
+          400
+        );
+      }
+
       const cartItemWithProduct = cart.items.find((item) => {
         return item.productId === body.productId;
       });
-
       if (!cartItemWithProduct) {
         const cartItem = await prisma.cartItem.create({
           data: {

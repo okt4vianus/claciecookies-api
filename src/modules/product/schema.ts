@@ -4,30 +4,13 @@ import {
   UpsertProductImageSchema,
 } from "~/modules/product-image/schema";
 import { ProductSchema as BaseProductSchema } from "~/generated/zod";
-
-// export const ProductSchema = z.object({
-//   id: z.string(),
-//   name: z.string().min(3, "Name is required"),
-//   slug: z.string(),
-//   description: z.string().optional(),
-//   price: z.number().int().positive("Price must be a positive number"),
-//   stockQuantity: z
-//     .number()
-//     .int()
-//     .nonnegative("Stock quantity must be more than or equal to 0"),
-//   images: z.array(ProductImageSchema).optional(),
-//   createdAt: z.date(),
-//   updatedAt: z.date(),
-// });
+import { StockQuantitySchema } from "~/modules/common/schema";
 
 export const ProductSchema = BaseProductSchema.extend({
   name: z.string().min(3, "Name is required"),
   description: z.string().optional(),
   price: z.number().int().positive("Price must be a positive number"),
-  stockQuantity: z
-    .number()
-    .int()
-    .nonnegative("Stock quantity must be more than or equal to 0"),
+  stockQuantity: StockQuantitySchema,
   images: z.array(ProductImageSchema).optional(),
 });
 
