@@ -69,9 +69,13 @@ cartRoute.openapi(
       },
     },
     responses: {
+      200: {
+        content: { "application/json": { schema: CartItemSchema } },
+        description: "Product updated in cart successfully",
+      },
       201: {
         content: { "application/json": { schema: CartItemSchema } },
-        description: "Product created successfully",
+        description: "Product added to cart successfully",
       },
       500: {
         content: { "application/json": { schema: ErrorResponseSchema } },
@@ -80,25 +84,43 @@ cartRoute.openapi(
     },
   }),
   async (c) => {
+    // Calculate subTotal and total
+    // Get product data before calculate
+
     try {
       const user = c.get("user");
       const body = c.req.valid("json");
 
       const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
+        include: { items: true },
       });
       if (!cart) throw new Error("No user's cart");
 
-      const cartItem = await prisma.cartItem.create({
-        data: {
-          cartId: cart.id,
-          productId: body.productId,
-          quantity: body.quantity,
-        },
+      // Find existing cart item with the same product
+      const cartItemWithProduct = cart.items.find((item) => {
+        return item.productId === body.productId;
+      });
+
+      if (!cartItemWithProduct) {
+        const cartItem = await prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: body.productId,
+            quantity: body.quantity,
+          },
+          include: { product: { include: { images: true } } },
+        });
+        return c.json(cartItem, 201);
+      }
+
+      const newCartItem = await prisma.cartItem.update({
+        where: { id: cartItemWithProduct.id },
+        data: { quantity: body.quantity },
         include: { product: { include: { images: true } } },
       });
 
-      return c.json(cartItem, 201);
+      return c.json(newCartItem, 200);
     } catch (error) {
       return c.json({ message: "Failed to add product to cart", error }, 500);
     }
