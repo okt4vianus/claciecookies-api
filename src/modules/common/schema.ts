@@ -9,3 +9,14 @@ export const ErrorResponseSchema = z.object({
   message: z.string(),
   error: z.any().optional(),
 });
+
+export const cardItemQuantitySchema = z
+  .number()
+  .int()
+  .positive("Quantity must be a positive integer")
+  .min(1, "Quantity must be at least 1");
+
+export const stockQuantitySchema = z
+  .number()
+  .int()
+  .nonnegative("Quantity must be a non-negative integer");

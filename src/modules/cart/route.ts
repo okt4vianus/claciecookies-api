@@ -1,7 +1,12 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import { CartSchema } from "~/modules/cart/schema";
+import {
+  AddProductToCartSchema,
+  CartItemSchema,
+  CartSchema,
+} from "~/modules/cart/schema";
+import { ErrorResponseSchema } from "~/modules/common/schema";
 
 export const cartRoute = new OpenAPIHono();
 
@@ -43,5 +48,107 @@ cartRoute.openapi(
       return c.json(newCart);
     }
     return c.json(cart);
+  }
+);
+
+// ✅ PUT /cart/items
+
+cartRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Add product to cart",
+    method: "put",
+    path: "/items",
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    request: {
+      body: {
+        content: { "application/json": { schema: AddProductToCartSchema } },
+      },
+    },
+    responses: {
+      200: {
+        content: { "application/json": { schema: CartItemSchema } },
+        description: "Successfully update product in cart",
+      },
+      201: {
+        content: { "application/json": { schema: CartItemSchema } },
+        description: "Successfully add product to cart",
+      },
+      400: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Quantity exceeds available stock or invalid request",
+      },
+      500: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const body = c.req.valid("json");
+
+      const user = c.get("user");
+
+      const cart = await prisma.cart.findFirst({
+        where: { userId: user.id },
+        include: {
+          items: { include: { product: { include: { images: true } } } },
+        },
+      });
+
+      if (!cart) throw new Error("Cart not found");
+
+      const product = await prisma.product.findUnique({
+        where: { id: body.productId },
+        select: { price: true, stockQuantity: true },
+      });
+
+      if (!product) throw new Error("Product not found");
+
+      // const isQuantityValid = body.quantity > 0 && body.quantity <= product.stockQuantity;
+      if (body.quantity > product.stockQuantity) {
+        return c.json({ message: "Quantity exceeds available stock" }, 400);
+      }
+
+      const cartItemWithProduct = cart.items.find((item) => {
+        return item.productId === body.productId;
+      });
+
+      if (!cartItemWithProduct) {
+        const cartItem = await prisma.cartItem.create({
+          data: {
+            cartId: cart.id,
+            productId: body.productId,
+            quantity: body.quantity,
+            subTotalPrice: body.quantity * product.price, // Calculate subtotal price
+          },
+          include: {
+            product: { include: { images: true } },
+          },
+        });
+        return c.json(cartItem, 200);
+      }
+
+      const newCartItem = await prisma.cartItem.update({
+        where: { id: cartItemWithProduct.id },
+        data: {
+          quantity: body.quantity,
+          subTotalPrice: body.quantity * product.price, // Update subtotal price
+
+          // quantity: cartItemWithProduct.quantity + body.quantity,
+          // subTotalPrice:
+          //   (cartItemWithProduct.quantity + body.quantity) * product.price, // Update subtotal price
+        },
+        include: {
+          product: { include: { images: true } },
+        },
+      });
+
+      return c.json(newCartItem, 201);
+    } catch (error) {
+      return c.json({ message: "Failed to add product to cart", error }, 500);
+    }
   }
 );
