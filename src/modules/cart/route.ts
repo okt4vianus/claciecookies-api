@@ -79,6 +79,10 @@ cartRoute.openapi(
         content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Quantity exceeds available stock or invalid request",
       },
+      404: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Cart or Product not found",
+      },
       500: {
         content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Internal server error",
@@ -88,9 +92,9 @@ cartRoute.openapi(
   async (c) => {
     try {
       const body = c.req.valid("json");
-
       const user = c.get("user");
 
+      // Find the user's cart
       const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
         include: {
@@ -98,25 +102,32 @@ cartRoute.openapi(
         },
       });
 
-      if (!cart) throw new Error("Cart not found");
+      if (!cart) return c.json({ message: "Cart not found" }, 404);
 
+      // Find the product
       const product = await prisma.product.findUnique({
         where: { id: body.productId },
         select: { price: true, stockQuantity: true },
       });
 
-      if (!product) throw new Error("Product not found");
+      if (!product) return c.json({ message: "Product not found" }, 404);
 
-      // const isQuantityValid = body.quantity > 0 && body.quantity <= product.stockQuantity;
+      // Validate the quantity
+      if (body.quantity <= 0) {
+        return c.json({ message: "Quantity must be greater than 0" }, 400);
+      }
+
       if (body.quantity > product.stockQuantity) {
         return c.json({ message: "Quantity exceeds available stock" }, 400);
       }
 
+      // Check if the product is already in the cart
       const cartItemWithProduct = cart.items.find((item) => {
         return item.productId === body.productId;
       });
 
       if (!cartItemWithProduct) {
+        // Create new cart item
         const cartItem = await prisma.cartItem.create({
           data: {
             cartId: cart.id,
@@ -128,25 +139,53 @@ cartRoute.openapi(
             product: { include: { images: true } },
           },
         });
+
+        // Calculate total price for new item
+        const totalPrice =
+          cart.items.reduce((total, item) => {
+            return total + (item.subTotalPrice || 0);
+          }, 0) + cartItem.subTotalPrice;
+
+        // Save totalPrice to cart table
+        await prisma.cart.update({
+          where: { id: cart.id },
+          data: { totalPrice },
+        });
+
+        return c.json(cartItem, 201);
+      } else {
+        // Update existing cart item
+        const cartItem = await prisma.cartItem.update({
+          where: { id: cartItemWithProduct.id },
+          data: {
+            quantity: body.quantity,
+            subTotalPrice: body.quantity * product.price, // Update subtotal price
+
+            // quantity: cartItemWithProduct.quantity + body.quantity,
+            // subTotalPrice:
+            //   (cartItemWithProduct.quantity + body.quantity) * product.price, // Update subtotal price
+          },
+          include: {
+            product: { include: { images: true } },
+          },
+        });
+
+        // Calculate total price for updated item
+        const totalPrice = cart.items.reduce((total, item) => {
+          if (item.productId === body.productId) {
+            return total + cartItem.subTotalPrice;
+          }
+          return total + (item.subTotalPrice || 0);
+        }, 0);
+
+        // Save totalPrice to cart table
+        await prisma.cart.update({
+          where: { id: cart.id },
+          data: { totalPrice },
+        });
+
         return c.json(cartItem, 200);
       }
-
-      const newCartItem = await prisma.cartItem.update({
-        where: { id: cartItemWithProduct.id },
-        data: {
-          quantity: body.quantity,
-          subTotalPrice: body.quantity * product.price, // Update subtotal price
-
-          // quantity: cartItemWithProduct.quantity + body.quantity,
-          // subTotalPrice:
-          //   (cartItemWithProduct.quantity + body.quantity) * product.price, // Update subtotal price
-        },
-        include: {
-          product: { include: { images: true } },
-        },
-      });
-
-      return c.json(newCartItem, 201);
     } catch (error) {
       return c.json({ message: "Failed to add product to cart", error }, 500);
     }
