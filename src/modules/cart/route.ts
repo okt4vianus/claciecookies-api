@@ -5,8 +5,13 @@ import {
   AddProductToCartSchema,
   CartItemSchema,
   CartSchema,
+  ParamItemIdSchema,
+  UpdateCartItemQuantitySchema,
 } from "~/modules/cart/schema";
-import { ErrorResponseSchema } from "~/modules/common/schema";
+import {
+  ErrorResponseSchema,
+  ResponseStringSchema,
+} from "~/modules/common/schema";
 
 export const cartRoute = new OpenAPIHono();
 
@@ -52,7 +57,6 @@ cartRoute.openapi(
 );
 
 // ✅ PUT /cart/items
-
 cartRoute.openapi(
   createRoute({
     tags,
@@ -188,6 +192,240 @@ cartRoute.openapi(
       }
     } catch (error) {
       return c.json({ message: "Failed to add product to cart", error }, 500);
+    }
+  }
+);
+
+// ✅ DELETE /cart/items/{id}
+cartRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Remove item from cart",
+    method: "delete",
+    path: "/items/{id}",
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    request: {
+      params: ParamItemIdSchema,
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: ResponseStringSchema,
+          },
+        },
+        description: "Successfully removed item from cart",
+      },
+      404: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Cart item not found or doesn't belong to user",
+      },
+      500: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const { id: itemId } = c.req.valid("param");
+      const user = c.get("user");
+
+      // Find the user's cart
+      const cart = await prisma.cart.findFirst({
+        where: { userId: user.id },
+        include: {
+          items: true,
+        },
+      });
+
+      if (!cart) {
+        return c.json({ message: "Cart not found" }, 404);
+      }
+
+      // Find the cart item to delete
+      const cartItem = await prisma.cartItem.findFirst({
+        where: {
+          id: itemId,
+          cartId: cart.id, // Ensure the item belongs to the user's cart
+        },
+        include: {
+          product: { select: { id: true, name: true } },
+        },
+      });
+
+      if (!cartItem) {
+        return c.json({ message: "Cart item not found" }, 404);
+      }
+
+      // Delete the cart item
+      await prisma.cartItem.delete({
+        where: { id: cartItem.id },
+      });
+
+      // Recalculate total price after deletion
+      const remainingItems = await prisma.cartItem.findMany({
+        where: { cartId: cart.id },
+      });
+
+      const totalPrice = remainingItems.reduce((total, item) => {
+        return total + (item.subTotalPrice || 0);
+      }, 0);
+
+      // Update cart total price
+      await prisma.cart.update({
+        where: { id: cart.id },
+        data: { totalPrice },
+      });
+
+      return c.json(
+        {
+          message: "Item successfully removed from cart",
+          deletedItem: cartItem,
+        },
+        200
+      );
+    } catch (error) {
+      return c.json({ message: "Failed to remove item from cart", error }, 500);
+    }
+  }
+);
+
+// ✅ PATCH /cart/items/{id}
+cartRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Update product quantity in cart",
+    method: "patch",
+    path: "/items/{id}",
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    request: {
+      params: ParamItemIdSchema,
+      body: {
+        content: {
+          "application/json": {
+            schema: UpdateCartItemQuantitySchema, //cardItemQuantitySchema,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": { schema: UpdateCartItemQuantitySchema },
+        },
+        description: "Successfully updated product quantity in cart",
+      },
+      400: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Quantity exceeds available stock or invalid request",
+      },
+      404: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Cart item not found or doesn't belong to user",
+      },
+      500: {
+        content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Internal server error",
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const { id: itemId } = c.req.valid("param");
+      const body = c.req.valid("json");
+      const user = c.get("user");
+
+      // Find the user's cart
+      const cart = await prisma.cart.findFirst({
+        where: { userId: user.id },
+        include: {
+          items: true,
+        },
+      });
+
+      if (!cart) {
+        return c.json({ message: "Cart not found" }, 404);
+      }
+
+      // Find the cart item to update
+      const cartItem = await prisma.cartItem.findFirst({
+        where: {
+          id: itemId,
+          cartId: cart.id, // Ensure the item belongs to the user's cart
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              stockQuantity: true,
+              images: true,
+            },
+          },
+        },
+      });
+
+      if (!cartItem) {
+        return c.json({ message: "Cart item not found" }, 404);
+      }
+
+      // Validate the new quantity against stock
+      if (body.quantity > cartItem.product.stockQuantity) {
+        return c.json(
+          {
+            message: `Quantity exceeds available stock. Available: ${cartItem.product.stockQuantity}`,
+          },
+          400
+        );
+      }
+
+      // Update the cart item quantity and subtotal
+      const updatedCartItem = await prisma.cartItem.update({
+        where: { id: cartItem.id },
+        data: {
+          quantity: body.quantity,
+          subTotalPrice: body.quantity * cartItem.product.price,
+        },
+        include: {
+          product: {
+            select: {
+              id: true,
+              name: true,
+              price: true,
+              images: true,
+            },
+          },
+        },
+      });
+
+      // Recalculate total price for the entire cart
+      const allCartItems = await prisma.cartItem.findMany({
+        where: { cartId: cart.id },
+      });
+
+      const totalPrice = allCartItems.reduce((total, item) => {
+        if (item.id === cartItem.id) {
+          return total + updatedCartItem.subTotalPrice;
+        }
+        return total + (item.subTotalPrice || 0);
+      }, 0);
+
+      // Update cart total price
+      await prisma.cart.update({
+        where: { id: cart.id },
+        data: { totalPrice },
+      });
+
+      return c.json(updatedCartItem, 200);
+    } catch (error) {
+      return c.json(
+        { message: "Failed to update cart item quantity", error },
+        500
+      );
     }
   }
 );

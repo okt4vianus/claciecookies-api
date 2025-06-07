@@ -10,6 +10,8 @@ export const ErrorResponseSchema = z.object({
   error: z.any().optional(),
 });
 
+export const ResponseStringSchema = z.object({ message: z.string() });
+
 export const cardItemQuantitySchema = z
   .number()
   .int()
