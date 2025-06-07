@@ -137,33 +137,43 @@ authRoute.openapi(
 authRoute.openapi(
   createRoute({
     tags,
-    summary: "Check authenticated user and if authorized",
+    summary: "Get authenticated user profile",
     method: "get",
     path: "/me",
     security: [{ BearerAuth: [] }], // OpenAPI security scheme
     middleware: checkAuthorized, // Actual logic process- Custom middleware to check authorization
     responses: {
       200: {
-        description: "Successfully check authenticated user",
+        description: "Successfully retrieved authenticated user",
         content: { "application/json": { schema: UserSchema } },
       },
+      401: {
+        description: "Unauthorized - Invalid or missing token",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+      404: {
+        description: "User not found",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
       500: {
-        description: "Failed to check authenticated user",
-        // content: { "application/json": { schema: ErrorResponseSchema } },
+        description: "Internal server error",
+        content: { "application/json": { schema: ErrorResponseSchema } },
       },
     },
   }),
   async (c) => {
     try {
       const user = c.get("user");
+
       if (!user) {
         return c.json({ message: "User not found" }, 404);
       }
+
       return c.json(user, 200);
     } catch (error) {
-      console.error("Error checking authenticated user:", error);
+      console.error("Error retrieving authenticated user:", error);
       return c.json(
-        { message: "Failed to  authenticated user", details: error },
+        { message: "Failed to retrieve authenticated user", details: error },
         500
       );
     }
