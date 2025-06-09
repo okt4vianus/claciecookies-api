@@ -5,7 +5,11 @@ import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import { LoginBodySchema, RegisterBodySchema } from "~/modules/auth/schema";
+import {
+  LoginBodySchema,
+  LoginResponseSchema,
+  RegisterBodySchema,
+} from "~/modules/auth/schema";
 
 export const authRoute = new OpenAPIHono();
 
@@ -74,16 +78,12 @@ authRoute.openapi(
     },
     responses: {
       200: {
-        content: { "application/json": { schema: UserSchema } },
+        content: { "application/json": { schema: LoginResponseSchema } },
         description: "User logged in successfully",
       },
       400: {
-        // content: { "application/json": { schema: ErrorResponseSchema } },
-        description: "User login failed",
-      },
-      500: {
         content: { "application/json": { schema: ErrorResponseSchema } },
-        description: "Internal server error",
+        description: "Unable to login",
       },
     },
   }),
@@ -92,18 +92,20 @@ authRoute.openapi(
       const body = c.req.valid("json");
       const { password, ...userData } = body;
 
-      // const hashedPassword = await hashPassword(password);
       const user = await prisma.user.findUnique({
         where: { email: userData.email },
         include: { password: true },
       });
 
       if (!user) {
-        return c.json({ message: "User not found" }, 400);
+        return c.json({ message: "User not found", error: null }, 400);
       }
 
       if (!user.password) {
-        return c.json({ message: "User does not have a password" }, 400);
+        return c.json(
+          { message: "User does not have a password", error: null },
+          400
+        );
       }
 
       const isPasswordValid = await verifyPassword(
@@ -112,22 +114,26 @@ authRoute.openapi(
       );
 
       if (!isPasswordValid) {
-        return c.json({ message: "Invalid password" }, 400);
+        return c.json({ message: "Invalid password", error: null }, 400);
       }
 
       // Remove password from the response
+      // Only return the user fields as defined in UserSchema
       const { password: _, ...userWithoutPassword } = user;
 
       const token = await signToken(userWithoutPassword.id);
       if (!token) {
-        return c.json({ message: "Failed to generate token" }, 500);
+        return c.json(
+          { message: "Failed to generate token", error: null },
+          400
+        );
       }
 
       c.header("Token", token);
 
-      return c.json({ token, user: userWithoutPassword }, 201);
+      return c.json({ token, user: userWithoutPassword, error: null }, 200);
     } catch (error) {
-      return c.json({ message: "User login failed", details: error }, 500);
+      return c.json({ message: "User login failed", details: error }, 400);
     }
   }
 );

@@ -24,5 +24,10 @@ export const LoginBodySchema = AuthBodySchema.pick({
   password: true,
 });
 
+export const LoginResponseSchema = z.object({
+  token: z.string(),
+  user: UserSchema,
+});
+
 export type RegisterBody = z.infer<typeof RegisterBodySchema>;
 export type LoginBody = z.infer<typeof LoginBodySchema>;
