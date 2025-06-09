@@ -98,12 +98,20 @@ authRoute.openapi(
       });
 
       if (!user) {
-        return c.json({ message: "User not found", error: null }, 400);
+        return c.json(
+          { field: "email", message: "User not found", error: null },
+          400
+        );
       }
 
       if (!user.password) {
         return c.json(
-          { message: "User does not have a password", error: null },
+          {
+            field: "password",
+            message:
+              "User does not have a password. Might have login with Google.",
+            error: null,
+          },
           400
         );
       }
@@ -114,7 +122,14 @@ authRoute.openapi(
       );
 
       if (!isPasswordValid) {
-        return c.json({ message: "Invalid password", error: null }, 400);
+        return c.json(
+          {
+            field: "password",
+            message: "Invalid password",
+            error: null,
+          },
+          400
+        );
       }
 
       // Remove password from the response

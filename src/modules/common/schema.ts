@@ -7,6 +7,7 @@ export const SuccessResponseSchema = z.object({
 
 export const ErrorResponseSchema = z.object({
   message: z.string(),
+  field: z.any().optional(),
   error: z.any().optional(),
 });
 
