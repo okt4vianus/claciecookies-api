@@ -72,9 +72,8 @@ authRoute.openapi(
         content: { "application/json": { schema: LoginBodySchema } },
       },
     },
-
     responses: {
-      201: {
+      200: {
         content: { "application/json": { schema: UserSchema } },
         description: "User logged in successfully",
       },
