@@ -1,4 +1,5 @@
 // import { z } from "@hono/zod-openapi";
+import { use } from "hono/jsx";
 import { z } from "zod";
 import { UserSchema } from "~/generated/zod";
 
@@ -9,6 +10,9 @@ export const AuthBodySchema = UserSchema.omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
+  username: z.string().min(3, "Username must be at least 3 characters long"),
+  email: z.string().email("Invalid email format"),
+  fullName: z.string().min(3, "Full name cannot be empty"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
