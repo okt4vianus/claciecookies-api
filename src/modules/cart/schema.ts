@@ -15,6 +15,7 @@ export const CartSchema = BaseChartSchema.extend({
 });
 
 export const AddProductToCartSchema = z.object({
+  intent: z.enum(["add", "update"]),
   productId: z.string().min(1, "Product ID is required"),
   quantity: cardItemQuantitySchema,
 });
