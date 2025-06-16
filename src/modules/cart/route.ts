@@ -17,7 +17,7 @@ export const cartRoute = new OpenAPIHono();
 
 const tags = ["Cart"];
 
-// ✅ GET /cart
+// GET /cart
 cartRoute.openapi(
   createRoute({
     tags,
@@ -56,11 +56,11 @@ cartRoute.openapi(
   }
 );
 
-// ✅ PUT /cart/items
+// PUT /cart/items
 cartRoute.openapi(
   createRoute({
     tags,
-    summary: "Add product to cart",
+    summary: "Update product in cart",
     method: "put",
     path: "/items",
     security: [{ BearerAuth: [] }],
@@ -158,20 +158,24 @@ cartRoute.openapi(
 
         return c.json(cartItem, 201);
       } else {
+        // Update existing cart item by adding more quantity or replacing quantity
+        let newQuantity = 0;
+        if (body.intent === "add") {
+          newQuantity = cartItemWithProduct.quantity + body.quantity;
+        } else if (body.intent === "update") {
+          newQuantity = body.quantity;
+        } else {
+          newQuantity = 1;
+        }
+
         // Update existing cart item
         const cartItem = await prisma.cartItem.update({
           where: { id: cartItemWithProduct.id },
           data: {
-            quantity: body.quantity,
-            subTotalPrice: body.quantity * product.price, // Update subtotal price
-
-            // quantity: cartItemWithProduct.quantity + body.quantity,
-            // subTotalPrice:
-            //   (cartItemWithProduct.quantity + body.quantity) * product.price, // Update subtotal price
+            quantity: newQuantity,
+            subTotalPrice: newQuantity * product.price,
           },
-          include: {
-            product: { include: { images: true } },
-          },
+          include: { product: { include: { images: true } } },
         });
 
         // Calculate total price for updated item
@@ -196,7 +200,7 @@ cartRoute.openapi(
   }
 );
 
-// ✅ DELETE /cart/items/{id}
+// DELETE /cart/items/{id}
 cartRoute.openapi(
   createRoute({
     tags,
@@ -292,7 +296,7 @@ cartRoute.openapi(
   }
 );
 
-// ✅ PATCH /cart/items/{id}
+// PATCH /cart/items/{id}
 cartRoute.openapi(
   createRoute({
     tags,
