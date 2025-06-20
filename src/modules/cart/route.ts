@@ -8,10 +8,7 @@ import {
   ParamItemIdSchema,
   UpdateCartItemQuantitySchema,
 } from "~/modules/cart/schema";
-import {
-  ErrorResponseSchema,
-  ResponseStringSchema,
-} from "~/modules/common/schema";
+import { ErrorResponseSchema, ResponseStringSchema } from "~/modules/common/schema";
 
 export const cartRoute = new OpenAPIHono();
 
@@ -120,7 +117,6 @@ cartRoute.openapi(
       if (body.quantity <= 0) {
         return c.json({ message: "Quantity must be greater than 0" }, 400);
       }
-
       if (body.quantity > product.stockQuantity) {
         return c.json({ message: "Quantity exceeds available stock" }, 400);
       }
@@ -166,6 +162,11 @@ cartRoute.openapi(
           newQuantity = body.quantity;
         } else {
           newQuantity = 1;
+        }
+
+        // Validate the new quantity against stock
+        if (newQuantity > product.stockQuantity) {
+          return c.json({ message: `Quantity exceeds available stock. Available: ${product.stockQuantity}` }, 400);
         }
 
         // Update existing cart item
@@ -426,10 +427,7 @@ cartRoute.openapi(
 
       return c.json(updatedCartItem, 200);
     } catch (error) {
-      return c.json(
-        { message: "Failed to update cart item quantity", error },
-        500
-      );
+      return c.json({ message: "Failed to update cart item quantity", error }, 500);
     }
   }
 );
