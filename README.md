@@ -50,3 +50,11 @@ open http://localhost:3000
 | `/cart/items`      | `PUT`    | Add product & quantity to cart | Authenticated | Done   |
 | `/cart/items/{id}` | `DELETE` | Delete product from cart       | Authenticated | Done   |
 | `/cart/items/{id}` | `PATCH`  | Update product quantity        | Authenticated | Done   |
+
+| Endpoint              | HTTP     | Description                      | Permission    | Status |
+| --------------------- | -------- | -------------------------------- | ------------- | ------ |
+| `/orders`             | `GET`    | Get user's orders                | Authenticated | Check  |
+| `/orders/{id}`        | `GET`    | Get order by ID                  | Authenticated | Check  |
+| `/orders`             | `POST`   | Create new order                 | Authenticated | Check  |
+| `/orders/{id}/status` | `PATCH`  | Update order status (Admin only) | Admin         | Check  |
+| `/orders/{id}`        | `DELETE` | Cancel order                     | Authenticated | Check  |
