@@ -20,6 +20,9 @@ generator zod {
   output   = "../src/generated/zod"
 }
 
+// ============================
+// USER MANAGEMENT
+// ============================
 model User {
   id String @id @default(ulid())
 
@@ -27,12 +30,34 @@ model User {
   email    String @unique
   fullName String
 
+  //   phone       String?
+  //   avatar      String?
+  //   isActive    Boolean   @default(true)
+  //   role        UserRole  @default(CUSTOMER)
+  //   emailVerified Boolean @default(false)
+  //   phoneVerified Boolean @default(false)
+
+  // Relations
   password Password?
+  Cart     Cart?
+  // orders        Order[]
+  // addresses     Address[]
+  // reviews       Review[]
+  // userSettings  UserSettings?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Cart      Cart?
+
+  // Database index
+  // @@index([email])
+  // @@index([username])
 }
+
+// enum UserRole {
+//   CUSTOMER
+//   ADMIN
+//   SUPER_ADMIN
+// }
 
 model Password {
   id String @id @default(ulid())
@@ -46,6 +71,83 @@ model Password {
   updatedAt DateTime @updatedAt
 }
 
+// model UserSettings {
+//   id               String  @id @default(ulid())
+//   userId           String  @unique
+//   defaultAddressId String?
+//   newsletter       Boolean @default(true)
+//   notifications    Boolean @default(true)
+
+//   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   defaultAddress Address? @relation(fields: [defaultAddressId], references: [id])
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+// }
+
+// ============================
+// ADDRESS MANAGEMENT
+// ============================
+// model Address {
+//   id            String  @id @default(ulid())
+//   userId        String
+//   label         String? // "Home", "Office", etc.
+//   recipientName String
+//   phone         String
+//   street        String
+//   city          String
+//   province      String
+//   postalCode    String
+//   country       String  @default("Indonesia")
+
+//   // Optional detailed location
+//   district      String?
+//   subDistrict   String?
+//   landmark      String?
+//   notes         String? // Instructions for delivery
+
+//   // Map coordinates
+//   latitude      Float?
+//   longitude     Float?
+
+//   isDefault     Boolean @default(false)
+//   isActive      Boolean @default(true)
+
+//   // Relations
+//   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   orders        Order[]
+//   userSettings  UserSettings[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+// Database index
+//   @@index([userId])
+// }
+
+// ============================
+// CATEGORY MANAGEMENT
+// ============================
+// model Category {
+//   id    String @id @default(ulid())
+//   name  String @unique
+//   slug  String @unique
+//   image String? // opsional, URL gambar kategori
+//   isActive Boolean @default(true)
+
+//   products Product[] // relasi dengan produk
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+// Database index
+//   @@index([slug])
+// }
+
+// ============================
+// PRODUCT MANAGEMENT
+// ============================
 model Product {
   id String @id @default(ulid())
 
@@ -53,14 +155,39 @@ model Product {
   name        String @unique // Matcha Soft Cookies
   description String @default("Belum ada deskripsi.") @db.Text // Matcha soft cookies with a hint of green tea
   price       Int // Rupiah/IDR
+  // originalPrice Int?   // Original price for discounts
+  // weight      Int?    // Weight in grams for shipping
+  // dimensions  String? // "10x5x2 cm"
+
+  // categoryId String?
+  // category   Category? @relation(fields: [categoryId], references: [id])
 
   images        ProductImage[]
   stockQuantity Int
+  // isActive      Boolean @default(true)
 
+  // SEO
+  // metaTitle       String?
+  // metaDescription String?
+
+  // Fields for performance
+  // averageRating Float?
+  // totalReviews  Int @default(0)
+  // totalSold     Int @default(0) // Total quantity sold
+
+  // Relations
   CartItem CartItem[]
+  // orderItems OrderItem[]
+  // reviews    Review[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Database index
+  // @@index([slug])
+  // @@index([categoryId])
+  // @@index([isActive])
+  // @@index([price])
 }
 
 model ProductImage {
@@ -68,14 +195,20 @@ model ProductImage {
 
   url  String @unique // https://ucarecdn.com/ba783126-112d-4ed2-ac77-97cfdfce22da/
   name String // matcha-soft-cookies-1.jpg
+  // sortOrder Int     @default(1)
 
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   productId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  //  @@index([productId])
 }
 
+// ============================
+// CART MANAGEMENT  
+// ============================
 model Cart {
   id String @id @default(ulid())
 
@@ -89,6 +222,8 @@ model Cart {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  //  @@index([userId])
 }
 
 model CartItem {
@@ -101,8 +236,199 @@ model CartItem {
   cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   quantity      Int @default(1) // Quantity of the product in the cart item
+  // price         Int // Price when added to cart
   subTotalPrice Int @default(0) // Subtotal price of the cart item (quantity * product price)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // @@unique([cartId, productId]) // Prevent duplicate items
+  // @@index([cartId])
+  // @@index([productId])
 }
+
+// ============================
+// ORDER MANAGEMENT
+// ============================
+// model Order {
+//   id          String @id @default(ulid())
+//   orderNumber String @unique // ORD-2025-001
+//   userId      String
+
+//   user User @relation(fields: [userId], references: [id])
+
+//   // Order details
+//   status        OrderStatus    @default(PENDING)
+//   paymentStatus PaymentStatus  @default(PENDING)
+//   paymentMethod PaymentMethod?
+
+//   // Pricing
+//   subtotal     Int // Before shipping
+//   shippingCost Int @default(0)
+//   discount     Int @default(0)
+//   totalAmount  Int
+
+//   // Shipping information
+//   shippingAddressId String
+//   shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
+
+//   // Tracking
+//   trackingNumber String?
+//   carrier        String? // "Regular", "Express"
+
+//   // Timestamps for order lifecycle
+//   confirmedAt DateTime?
+//   shippedAt   DateTime?
+//   deliveredAt DateTime?
+//   cancelledAt DateTime?
+
+//   notes String? // Special instructions
+
+//   // Relations
+//   orderItems OrderItem[]
+//   payments   Payment[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([userId])
+//   @@index([status])
+//   @@index([orderNumber])
+// }
+
+// enum OrderStatus {
+//   PENDING
+//   CONFIRMED
+//   PROCESSING
+//   SHIPPED
+//   DELIVERED
+//   CANCELLED
+// }
+
+// enum PaymentStatus {
+//   PENDING
+//   PAID
+//   FAILED
+// }
+
+// enum PaymentMethod {
+//   BANK_TRANSFER
+//   E_WALLET
+//   COD
+// }
+
+// model OrderItem {
+//   id        String @id @default(ulid())
+//   orderId   String
+//   productId String
+
+//   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+//   product Product @relation(fields: [productId], references: [id])
+
+//   quantity Int
+//   price    Int // Price when ordered (historical price)
+//   total    Int // quantity * price
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([orderId])
+// }
+
+// ============================
+// PAYMENT
+// ============================
+// model Payment {
+//   id       String @id @default(cuid())
+//   orderId  String
+//   amount   Int
+//   method   PaymentMethod
+//   status   PaymentStatus @default(PENDING)
+
+//   // Bank transfer details
+//   bankName      String?
+//   accountNumber String?
+
+//   // Proof of payment
+//   proofImageUrl String?
+
+//   paidAt    DateTime?
+//   notes     String?
+
+//   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([orderId])
+// }
+
+// ============================
+// REVIEW PRODUCT
+// ============================
+// model Review {
+//   id        String @id @default(cuid())
+//   productId String
+//   userId    String // Wajib login untuk review
+
+//   rating    Int    // 1-5 bintang
+//   comment   String? @db.Text
+//   images    String[] // URL gambar review
+
+//   isApproved Boolean @default(false) // Moderasi admin
+
+//   user    User    @relation(fields: [userId], references: [id])
+//   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@unique([userId, productId]) // Satu user satu review per produk
+//   @@index([productId])
+//   @@index([rating])
+// }
+
+// ============================
+// SHOP SETTINGS
+// ============================
+// model ShopSettings {
+//   id    String @id @default(cuid())
+//   key   String @unique
+//   value String
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// ============================
+// BANNER/SLIDER
+// ============================
+// model Banner {
+//   id        String  @id @default(cuid())
+//   title     String
+//   subtitle  String?
+//   imageUrl  String
+//   linkUrl   String?
+//   isActive  Boolean @default(true)
+//   sortOrder Int     @default(0)
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   @@index([isActive])
+//   @@index([sortOrder])
+// }
+
+// ============================
+// SIMPLE REPORT
+// ============================
+// model DailySales {
+//   id          String @id @default(cuid())
+//   date        DateTime @unique @db.Date
+//   totalOrders Int      @default(0)
+//   totalSales  Int      @default(0)
+
+//   createdAt DateTime @default(now())
+
+//   @@index([date])
+// }
