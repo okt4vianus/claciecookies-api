@@ -43,9 +43,8 @@ model User {
   // Relations
   password Password?
   Cart     Cart?
-  // orders        Order[]
   // addresses     Address[]
-  // reviews       Review[]
+  // orders        Order[]
   // userSettings  UserSettings?
 
   createdAt DateTime @default(now())
