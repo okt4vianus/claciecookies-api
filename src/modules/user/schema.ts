@@ -10,5 +10,7 @@ export const ParamUserIdentifierSchema = z.object({
   identifier: z.string().min(3, "Identifier is required"), //User ID or Username"
 });
 
+export const PrivateUserAddressSchema = UserSchema;
+
 // export type User = z.infer<typeof UserSchema>;
 // export type Users = z.infer<typeof UsersSchema>;
