@@ -26,16 +26,19 @@ generator zod {
 model User {
   id String @id @default(ulid())
 
-  username String @unique
-  email    String @unique
   fullName String
 
-  //   phone       String?
+  username      String  @unique
+  email         String  @unique
+  emailVerified Boolean @default(false)
+
+  phoneNumber         String?
+  phoneNumberVerified Boolean? @default(false)
+
   //   avatar      String?
   //   isActive    Boolean   @default(true)
   //   role        UserRole  @default(CUSTOMER)
   //   emailVerified Boolean @default(false)
-  //   phoneVerified Boolean @default(false)
 
   // Relations
   password Password?
