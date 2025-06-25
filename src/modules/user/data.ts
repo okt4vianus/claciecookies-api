@@ -1,44 +1,42 @@
-export type User = {
-  username: string;
-  email: string;
-  fullName: string;
+import { User } from "~/generated/prisma";
+
+// export type CreateUser = User;
+// export type CreateUser = Pick<User, "fullName" | "username" | "email"> & {
+//   password: string;
+// };
+
+export type CreateUser = Pick<User, "fullName" | "username" | "email"> & {
+  password: string;
 };
 
-export type CreateUser = User;
 export type UpdateUser = Partial<User>;
 
 // Single user
 export const dataUser: CreateUser = {
-  username: "johndoe",
-  email: "john.doe@gmail.com",
   fullName: "John Doe",
+  username: "johndoe",
+  email: "john.doe@claciecookies.com",
+  password: "placeholder",
 };
 
 // Multiple users for seeding
 export const dataUsers: CreateUser[] = [
   {
-    username: "johndoe",
-    email: "john.doe@gmail.com",
-    fullName: "John Doe",
+    fullName: "Admin",
+    username: "admin",
+    email: "admin@claciecookies.com",
+    password: "placeholder",
   },
   {
-    username: "janedoe",
-    email: "jane.doe@yahoo.com",
-    fullName: "Jane Doe",
+    fullName: "Clacie",
+    username: "clacie",
+    email: "clacie@claciecookies.com",
+    password: "placeholder",
   },
   {
-    username: "mikejohnson",
-    email: "mike.johnson@outlook.com",
-    fullName: "Mike Johnson",
-  },
-  {
-    username: "sarahwilson",
-    email: "sarah.wilson@gmail.com",
-    fullName: "Sarah Wilson",
-  },
-  {
-    username: "davidbrown",
-    email: "david.brown@hotmail.com",
-    fullName: "David Brown",
+    fullName: "Oktav",
+    username: "oktav",
+    email: "oktav@claciecookies.com",
+    password: "placeholder",
   },
 ];
