@@ -10,5 +10,15 @@ export const ParamUserIdentifierSchema = z.object({
   identifier: z.string().min(3, "Identifier is required"), //User ID or Username"
 });
 
+export const PrivateUserProfileSchema = z.object({
+  fullName: z.string(),
+  email: z.string().email(),
+  phoneNumber: z.string().nullable(),
+});
+
+export const PrivateUserAddressSchema = UserSchema.extend({
+  address: z.string(),
+});
+
 // export type User = z.infer<typeof UserSchema>;
 // export type Users = z.infer<typeof UsersSchema>;

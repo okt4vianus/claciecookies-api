@@ -1,5 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { UserSchema } from "~/generated/zod";
+import { UserSchema as PrivateUserAddressSchema } from "~/generated/zod";
 import { hashPassword, verifyPassword } from "~/lib/password";
 import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
@@ -10,6 +10,7 @@ import {
   LoginResponseSchema,
   RegisterBodySchema,
 } from "~/modules/auth/schema";
+import { PrivateUserProfileSchema } from "../user/schema";
 
 export const authRoute = new OpenAPIHono();
 
@@ -29,7 +30,7 @@ authRoute.openapi(
     },
     responses: {
       201: {
-        content: { "application/json": { schema: UserSchema } },
+        content: { "application/json": { schema: PrivateUserAddressSchema } },
         description: "User registered successfully",
       },
       500: {
@@ -165,11 +166,7 @@ authRoute.openapi(
     responses: {
       200: {
         description: "Successfully retrieved authenticated user",
-        content: { "application/json": { schema: UserSchema } },
-      },
-      401: {
-        description: "Unauthorized - Invalid or missing token",
-        content: { "application/json": { schema: ErrorResponseSchema } },
+        content: { "application/json": { schema: PrivateUserAddressSchema } },
       },
       404: {
         description: "User not found",
@@ -190,6 +187,63 @@ authRoute.openapi(
       }
 
       return c.json(user, 200);
+    } catch (error) {
+      console.error("Error retrieving authenticated user:", error);
+      return c.json(
+        { message: "Failed to retrieve authenticated user", details: error },
+        500
+      );
+    }
+  }
+);
+
+// GET /auth/profile
+authRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Get complete authenticated user profile with address",
+    method: "get",
+    path: "/profile",
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    responses: {
+      200: {
+        description: "Successfully retrieved authenticated user",
+        content: { "application/json": { schema: PrivateUserProfileSchema } },
+      },
+      404: {
+        description: "User not found",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+      500: {
+        description: "Internal server error",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+
+      if (!user) {
+        return c.json({ message: "User not found" }, 404);
+      }
+
+      const userProfile = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { fullName: true, email: true, phoneNumber: true },
+      });
+
+      if (!userProfile) {
+        return c.json({ message: "User not found" }, 404);
+      }
+
+      // const userAddress = await prisma.user.findUnique({
+      //   where: { id: user.id },
+      //   // include: {address: true}
+      // });
+
+      return c.json(userProfile, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
       return c.json(
