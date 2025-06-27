@@ -5,11 +5,7 @@ import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import {
-  LoginBodySchema,
-  LoginResponseSchema,
-  RegisterBodySchema,
-} from "~/modules/auth/schema";
+import { LoginBodySchema, LoginResponseSchema, RegisterBodySchema } from "~/modules/auth/schema";
 import { PrivateUserProfileSchema } from "../user/schema";
 
 export const authRoute = new OpenAPIHono();
@@ -57,10 +53,7 @@ authRoute.openapi(
 
       return c.json(newUser, 201);
     } catch (error) {
-      return c.json(
-        { message: "Failed to registering user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to registering user", details: error }, 500);
     }
   }
 );
@@ -99,28 +92,21 @@ authRoute.openapi(
       });
 
       if (!user) {
-        return c.json(
-          { field: "email", message: "User not found", error: null },
-          400
-        );
+        return c.json({ field: "email", message: "User not found", error: null }, 400);
       }
 
       if (!user.password) {
         return c.json(
           {
             field: "password",
-            message:
-              "User does not have a password. Might have login with Google.",
+            message: "User does not have a password. Might have login with Google.",
             error: null,
           },
           400
         );
       }
 
-      const isPasswordValid = await verifyPassword(
-        password,
-        user.password.hash
-      );
+      const isPasswordValid = await verifyPassword(password, user.password.hash);
 
       if (!isPasswordValid) {
         return c.json(
@@ -139,10 +125,7 @@ authRoute.openapi(
 
       const token = await signToken(userWithoutPassword.id);
       if (!token) {
-        return c.json(
-          { message: "Failed to generate token", error: null },
-          400
-        );
+        return c.json({ message: "Failed to generate token", error: null }, 400);
       }
 
       c.header("Token", token);
@@ -189,10 +172,7 @@ authRoute.openapi(
       return c.json(user, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
   }
 );
@@ -264,10 +244,37 @@ authRoute.openapi(
       return c.json(userProfile, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
+  }
+);
+
+// PATCH /auth/profile
+authRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Update user profile",
+    method: "patch",
+    path: "/profile",
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    request: {
+      body: { content: { "application/json": { schema: PrivateUserProfileSchema } } },
+    },
+    responses: {
+      200: {
+        description: "Successfully updated user",
+        content: { "application/json": { schema: PrivateUserProfileSchema } },
+      },
+    },
+  }),
+  async (c) => {
+    const user = c.get("user");
+    const userData = c.req.valid("json");
+    const userProfile = await prisma.user.update({
+      where: { id: user.id },
+      data: userData,
+    });
+    return c.json(userProfile);
   }
 );
