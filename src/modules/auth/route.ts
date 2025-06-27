@@ -229,9 +229,27 @@ authRoute.openapi(
         return c.json({ message: "User not found" }, 404);
       }
 
+      // const userProfile = await prisma.user.findUnique({
+      //   where: { id: user.id },
+      //   select: { fullName: true, email: true, phoneNumber: true },
+      // });
+
       const userProfile = await prisma.user.findUnique({
         where: { id: user.id },
-        select: { fullName: true, email: true, phoneNumber: true },
+        select: {
+          fullName: true,
+          email: true,
+          phoneNumber: true,
+          addresses: {
+            where: { isDefault: true },
+            take: 1,
+            select: {
+              id: true,
+              street: true,
+              city: true,
+            },
+          },
+        },
       });
 
       if (!userProfile) {

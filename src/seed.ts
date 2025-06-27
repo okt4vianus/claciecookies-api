@@ -1,6 +1,6 @@
 import { dataProducts } from "~/modules/product/data";
 import { PrismaClient } from "~/generated/prisma";
-import { dataUsers } from "~/modules/user/data";
+import { dataAddresses, dataUsers } from "~/modules/user/data";
 import { hashPassword } from "~/lib/password";
 
 const prisma = new PrismaClient();
@@ -22,6 +22,26 @@ async function main() {
       },
     });
     console.info(`✓ User: ${upsertedUser.fullName} (${upsertedUser.email})`);
+  }
+
+  // 2. Seed Addresses
+  console.log("\n🏠 Seeding Addresses...");
+  for (const addressData of dataAddresses) {
+    const { userEmail, ...address } = addressData;
+
+    const user = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (user) {
+      const newAddress = await prisma.address.create({
+        data: {
+          ...address,
+          userId: user.id,
+        },
+      });
+      console.info(`✓ ${newAddress.label} for ${user.fullName}`);
+    }
   }
 
   // Seed Product
