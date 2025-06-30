@@ -310,10 +310,6 @@ authRoute.openapi(
     try {
       const user = c.get("user");
 
-      if (!user) {
-        return c.json({ message: "User not found" }, 404);
-      }
-
       const address = await prisma.address.findFirst({
         where: { userId: user.id, isDefault: true },
         take: 1,
