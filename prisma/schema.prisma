@@ -41,7 +41,7 @@ model User {
 
   // Relations
   password  Password?
-  Cart      Cart?
+  Cart      Cart? // TODO: change to lowercase cart
   addresses Address[]
   // orders        Order[]
   // reviews       Review[]
@@ -92,8 +92,11 @@ model Password {
 // ADDRESS MANAGEMENT
 // ============================
 model Address {
-  id            String  @id @default(ulid())
-  userId        String
+  id String @id @default(ulid())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
   label         String? // "Home", "Office", etc.
   recipientName String
   phone         String
@@ -114,8 +117,6 @@ model Address {
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
 
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   // orders        Order[]
   // userSettings  UserSettings[]
 
