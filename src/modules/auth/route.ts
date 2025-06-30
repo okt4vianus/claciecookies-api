@@ -5,15 +5,9 @@ import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import {
-  LoginBodySchema,
-  LoginResponseSchema,
-  RegisterBodySchema,
-} from "~/modules/auth/schema";
-import {
-  CheckoutAddressSchema,
-  PrivateUserProfileSchema,
-} from "../user/schema";
+import { LoginBodySchema, LoginResponseSchema, RegisterBodySchema } from "~/modules/auth/schema";
+import { PrivateUserProfileSchema } from "../user/schema";
+import { AddressSchema, UpdateAddressSchema } from "../address/schema";
 
 export const authRoute = new OpenAPIHono();
 
@@ -60,10 +54,7 @@ authRoute.openapi(
 
       return c.json(newUser, 201);
     } catch (error) {
-      return c.json(
-        { message: "Failed to registering user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to registering user", details: error }, 500);
     }
   }
 );
@@ -102,28 +93,21 @@ authRoute.openapi(
       });
 
       if (!user) {
-        return c.json(
-          { field: "email", message: "User not found", error: null },
-          400
-        );
+        return c.json({ field: "email", message: "User not found", error: null }, 400);
       }
 
       if (!user.password) {
         return c.json(
           {
             field: "password",
-            message:
-              "User does not have a password. Might have login with Google.",
+            message: "User does not have a password. Might have login with Google.",
             error: null,
           },
           400
         );
       }
 
-      const isPasswordValid = await verifyPassword(
-        password,
-        user.password.hash
-      );
+      const isPasswordValid = await verifyPassword(password, user.password.hash);
 
       if (!isPasswordValid) {
         return c.json(
@@ -142,10 +126,7 @@ authRoute.openapi(
 
       const token = await signToken(userWithoutPassword.id);
       if (!token) {
-        return c.json(
-          { message: "Failed to generate token", error: null },
-          400
-        );
+        return c.json({ message: "Failed to generate token", error: null }, 400);
       }
 
       c.header("Token", token);
@@ -192,10 +173,7 @@ authRoute.openapi(
       return c.json(user, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
   }
 );
@@ -267,10 +245,7 @@ authRoute.openapi(
       return c.json(userProfile, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
   }
 );
@@ -319,7 +294,7 @@ authRoute.openapi(
     responses: {
       200: {
         description: "Successfully retrieved authenticated user",
-        content: { "application/json": { schema: CheckoutAddressSchema } },
+        content: { "application/json": { schema: AddressSchema } },
       },
       404: {
         description: "User not found",
@@ -339,60 +314,19 @@ authRoute.openapi(
         return c.json({ message: "User not found" }, 404);
       }
 
-      const userWithAddress = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          fullName: true,
-          phoneNumber: true,
-          addresses: {
-            where: { isDefault: true },
-            take: 1,
-            select: {
-              recipientName: true,
-              phone: true,
-              street: true,
-              city: true,
-              province: true,
-              postalCode: true,
-              country: true,
-              isDefault: true,
-              label: true,
-              landmark: true,
-              notes: true,
-              latitude: true,
-              longitude: true,
-            },
-          },
-        },
+      const address = await prisma.address.findFirst({
+        where: { userId: user.id, isDefault: true },
+        take: 1,
       });
+      if (!address) return c.json({ message: "Address not found" }, 404);
 
-      if (!userWithAddress || !userWithAddress.addresses.length) {
-        return c.json({ message: "User not found" }, 404);
-      }
-
-      // Return the first (default) address in the expected schema shape
-      const address = userWithAddress.addresses[0];
-
-      // If any nullable fields are null, convert them to undefined to match schema
-      const response = {
-        ...address,
-        label: address.label === null ? undefined : address.label,
-        landmark: address.landmark === null ? undefined : address.landmark,
-        notes: address.notes === null ? undefined : address.notes,
-        latitude: address.latitude === null ? undefined : address.latitude,
-        longitude: address.longitude === null ? undefined : address.longitude,
-      };
-
-      return c.json(response, 200);
+      return c.json(address, 200);
     } catch (error) {
-      console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve address", details: error }, 500);
     }
   }
 );
+
 // PATCH /auth/address
 authRoute.openapi(
   createRoute({
@@ -403,41 +337,23 @@ authRoute.openapi(
     security: [{ BearerAuth: [] }],
     middleware: checkAuthorized,
     request: {
-      body: {
-        content: { "application/json": { schema: CheckoutAddressSchema } },
-      },
+      body: { content: { "application/json": { schema: UpdateAddressSchema } } },
     },
     responses: {
       200: {
         description: "Successfully updated address",
-        content: {
-          "application/json": {
-            schema: CheckoutAddressSchema,
-          },
-        },
+        content: { "application/json": { schema: AddressSchema } },
       },
     },
   }),
   async (c) => {
-    const user = c.get("user");
     const addressData = c.req.valid("json");
 
-    const userAddres = await prisma.address.update({
-      where: { id: user.id },
+    const updatedAddress = await prisma.address.update({
+      where: { id: addressData.id },
       data: addressData,
     });
 
-    // Convert label: null to label: undefined to match schema
-    const response = {
-      ...userAddres,
-      label: userAddres.label === null ? undefined : userAddres.label,
-      landmark: userAddres.landmark === null ? undefined : userAddres.landmark,
-      notes: userAddres.notes === null ? undefined : userAddres.notes,
-      latitude: userAddres.latitude === null ? undefined : userAddres.latitude,
-      longitude:
-        userAddres.longitude === null ? undefined : userAddres.longitude,
-    };
-
-    return c.json(response);
+    return c.json(updatedAddress);
   }
 );
