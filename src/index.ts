@@ -7,6 +7,7 @@ import { productsRoute } from "~/modules/product/route";
 import { searchRoute } from "~/modules/search/route";
 import { usersRoute } from "~/modules/user/route";
 import { cartRoute } from "~/modules/cart/route";
+import { addressRoute } from "~/modules/address/route";
 
 const app = new OpenAPIHono();
 
@@ -14,6 +15,7 @@ app.use(logger());
 
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
+app.route("/address", addressRoute);
 app.route("/auth", authRoute);
 app.route("/search", searchRoute);
 app.route("/cart", cartRoute);
