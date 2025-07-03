@@ -41,7 +41,7 @@ model User {
 
   // Relations
   password  Password?
-  Cart      Cart? // TODO: change to lowercase cart
+  cart      Cart? // TODO: change to lowercase cart
   addresses Address[]
   // orders        Order[]
   // reviews       Review[]
@@ -177,7 +177,7 @@ model Product {
   // totalSold     Int @default(0) // Total quantity sold
 
   // Relations
-  CartItem CartItem[]
+  cartItem CartItem[]
   // orderItems OrderItem[]
   // reviews    Review[]
 
