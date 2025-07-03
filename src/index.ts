@@ -2,12 +2,12 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { logger } from "hono/logger";
 
+import { addressRoute } from "~/modules/address/route";
 import { authRoute } from "~/modules/auth/route";
+import { cartRoute } from "~/modules/cart/route";
 import { productsRoute } from "~/modules/product/route";
 import { searchRoute } from "~/modules/search/route";
 import { usersRoute } from "~/modules/user/route";
-import { cartRoute } from "~/modules/cart/route";
-import { addressRoute } from "~/modules/address/route";
 
 const app = new OpenAPIHono();
 
