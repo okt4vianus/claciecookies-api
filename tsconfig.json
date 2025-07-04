@@ -4,9 +4,10 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "strictNullChecks": true,
+    "noEmit": true,
     "paths": {
       "~/*": ["./src/*"]
     }
   },
-  "exclude": ["./src/generated/"]
+  "exclude": ["node_modules", "src/generated"]
 }
