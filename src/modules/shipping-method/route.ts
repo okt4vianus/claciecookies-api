@@ -1,13 +1,13 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import { ShippingMethodSchema } from "~/modules/shipping/schema";
+import { ShippingMethodsSchema } from "~/modules/shipping-method/schema";
 
-export const shippingRoute = new OpenAPIHono();
+export const shippingMethodRoute = new OpenAPIHono();
 
-const tags = ["Shipping"];
+const tags = ["Shipping Method"];
 
 // ✅ GET /shipping-methods
-shippingRoute.openapi(
+shippingMethodRoute.openapi(
   createRoute({
     tags,
     summary: "Get all shipping methods",
@@ -15,7 +15,7 @@ shippingRoute.openapi(
     path: "/",
     responses: {
       200: {
-        content: { "application/json": { schema: ShippingMethodSchema } },
+        content: { "application/json": { schema: ShippingMethodsSchema } },
         description: "Successfully retrieved all shipping methods",
       },
     },
