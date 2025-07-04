@@ -2,6 +2,8 @@ import { dataProducts } from "~/modules/product/data";
 import { PrismaClient } from "~/generated/prisma";
 import { dataAddresses, dataUsers } from "~/modules/user/data";
 import { hashPassword } from "~/lib/password";
+import { dataShippingMethods } from "~/modules/shipping/data";
+import { dataPaymentMethods } from "./modules/payment/data";
 
 const prisma = new PrismaClient();
 
@@ -42,6 +44,30 @@ async function main() {
       });
       console.info(`✓ ${newAddress.label} for ${user.fullName}`);
     }
+  }
+
+  // 3. Seed Shipping Methods
+  console.log("\n🚚 Seeding Shipping Methods...");
+  for (const shippingMethodData of dataShippingMethods) {
+    const { value, ...shipping } = shippingMethodData;
+    const upsertedShippingMethod = await prisma.shippingMethod.upsert({
+      where: { value },
+      update: { ...shipping },
+      create: { value, ...shipping },
+    });
+    console.info(`✓ Shipping Method: ${upsertedShippingMethod.name}`);
+  }
+
+  // 4. Seed Payment Methods
+  console.log("\n💳 Seeding Payment Methods...");
+  for (const paymentMethodData of dataPaymentMethods) {
+    const { value, ...payment } = paymentMethodData;
+    const upsertedPaymentMethod = await prisma.paymentMethod.upsert({
+      where: { value },
+      update: { ...payment },
+      create: { value, ...payment },
+    });
+    console.info(`✓ Payment Method: ${upsertedPaymentMethod.name}`);
   }
 
   // Seed Product
