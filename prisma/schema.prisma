@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -43,23 +37,10 @@ model User {
   password  Password?
   cart      Cart? // TODO: change to lowercase cart
   addresses Address[]
-  // orders        Order[]
-  // reviews       Review[]
-  // userSettings  UserSettings?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Database index
-  // @@index([email])
-  // @@index([username])
 }
-
-// enum UserRole {
-//   CUSTOMER
-//   ADMIN
-//   SUPER_ADMIN
-// }
 
 model Password {
   id String @id @default(ulid())
@@ -72,21 +53,6 @@ model Password {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
-// model UserSettings {
-//   id               String  @id @default(ulid())
-//   userId           String  @unique
-//   defaultAddressId String?
-//   newsletter       Boolean @default(true)
-//   notifications    Boolean @default(true)
-
-//   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   defaultAddress Address? @relation(fields: [defaultAddressId], references: [id])
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-// }
 
 // ============================
 // ADDRESS MANAGEMENT
@@ -117,34 +83,9 @@ model Address {
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
 
-  // orders        Order[]
-  // userSettings  UserSettings[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Database index
-  // @@index([userId])
 }
-
-// ============================
-// CATEGORY MANAGEMENT
-// ============================
-// model Category {
-//   id    String @id @default(ulid())
-//   name  String @unique
-//   slug  String @unique
-//   image String? // opsional, URL gambar kategori
-//   isActive Boolean @default(true)
-
-//   products Product[] // relasi dengan produk
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-// Database index
-//   @@index([slug])
-// }
 
 // ============================
 // PRODUCT MANAGEMENT
@@ -177,18 +118,10 @@ model Product {
   // totalSold     Int @default(0) // Total quantity sold
 
   // Relations
-  cartItem CartItem[]
-  // orderItems OrderItem[]
-  // reviews    Review[]
+  cartItem CartItem[] // TODO: change to lowercase cartitem
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Database index
-  // @@index([slug])
-  // @@index([categoryId])
-  // @@index([isActive])
-  // @@index([price])
 }
 
 model ProductImage {
@@ -203,8 +136,6 @@ model ProductImage {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  //  @@index([productId])
 }
 
 // ============================
@@ -223,8 +154,6 @@ model Cart {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  //  @@index([userId])
 }
 
 model CartItem {
@@ -242,194 +171,35 @@ model CartItem {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // @@unique([cartId, productId]) // Prevent duplicate items
-  // @@index([cartId])
-  // @@index([productId])
 }
 
 // ============================
-// ORDER MANAGEMENT
+// SHIPPING MANAGEMENT  
 // ============================
-// model Order {
-//   id          String @id @default(ulid())
-//   orderNumber String @unique // ORD-2025-001
-//   userId      String
+model ShippingMethod {
+  id String @id @default(ulid())
 
-//   user User @relation(fields: [userId], references: [id])
+  name        String // for label (show in UI): "Regular, Express, Same Day
+  value       String  @unique // regular, express, same_day
+  description String?
+  price       Int // Rupiah/IDR
+  isActive    Boolean @default(true) // Whether the shipping method is active
 
-//   // Order details
-//   status        OrderStatus    @default(PENDING)
-//   paymentStatus PaymentStatus  @default(PENDING)
-//   paymentMethod PaymentMethod?
-
-//   // Pricing
-//   subtotal     Int // Before shipping
-//   shippingCost Int @default(0)
-//   discount     Int @default(0)
-//   totalAmount  Int
-
-//   // Shipping information
-//   shippingAddressId String
-//   shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
-
-//   // Tracking
-//   trackingNumber String?
-//   carrier        String? // "Regular", "Express"
-
-//   // Timestamps for order lifecycle
-//   confirmedAt DateTime?
-//   shippedAt   DateTime?
-//   deliveredAt DateTime?
-//   cancelledAt DateTime?
-
-//   notes String? // Special instructions
-
-//   // Relations
-//   orderItems OrderItem[]
-//   payments   Payment[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([userId])
-//   @@index([status])
-//   @@index([orderNumber])
-// }
-
-// enum OrderStatus {
-//   PENDING
-//   CONFIRMED
-//   PROCESSING
-//   SHIPPED
-//   DELIVERED
-//   CANCELLED
-// }
-
-// enum PaymentStatus {
-//   PENDING
-//   PAID
-//   FAILED
-// }
-
-// enum PaymentMethod {
-//   BANK_TRANSFER
-//   E_WALLET
-//   COD
-// }
-
-// model OrderItem {
-//   id        String @id @default(ulid())
-//   orderId   String
-//   productId String
-
-//   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-//   product Product @relation(fields: [productId], references: [id])
-
-//   quantity Int
-//   price    Int // Price when ordered (historical price)
-//   total    Int // quantity * price
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([orderId])
-// }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
 // ============================
-// PAYMENT
+// PAYMENT MANAGEMENT  
 // ============================
-// model Payment {
-//   id       String @id @default(cuid())
-//   orderId  String
-//   amount   Int
-//   method   PaymentMethod
-//   status   PaymentStatus @default(PENDING)
+model PaymentMethod {
+  id String @id @default(ulid())
 
-//   // Bank transfer details
-//   bankName      String?
-//   accountNumber String?
+  name        String // for label (show in UI):"Bank Transfer"
+  value       String  @unique // bank_transfer
+  description String?
+  isActive    Boolean @default(true)
 
-//   // Proof of payment
-//   proofImageUrl String?
-
-//   paidAt    DateTime?
-//   notes     String?
-
-//   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([orderId])
-// }
-
-// ============================
-// REVIEW PRODUCT
-// ============================
-// model Review {
-//   id        String @id @default(cuid())
-//   productId String
-//   userId    String // Wajib login untuk review
-
-//   rating    Int    // 1-5 bintang
-//   comment   String? @db.Text
-//   images    String[] // URL gambar review
-
-//   isApproved Boolean @default(false) // Moderasi admin
-
-//   user    User    @relation(fields: [userId], references: [id])
-//   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@unique([userId, productId]) // Satu user satu review per produk
-//   @@index([productId])
-//   @@index([rating])
-// }
-
-// ============================
-// SHOP SETTINGS
-// ============================
-// model ShopSettings {
-//   id    String @id @default(cuid())
-//   key   String @unique
-//   value String
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
-// ============================
-// BANNER/SLIDER
-// ============================
-// model Banner {
-//   id        String  @id @default(cuid())
-//   title     String
-//   subtitle  String?
-//   imageUrl  String
-//   linkUrl   String?
-//   isActive  Boolean @default(true)
-//   sortOrder Int     @default(0)
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   @@index([isActive])
-//   @@index([sortOrder])
-// }
-
-// ============================
-// SIMPLE REPORT
-// ============================
-// model DailySales {
-//   id          String @id @default(cuid())
-//   date        DateTime @unique @db.Date
-//   totalOrders Int      @default(0)
-//   totalSales  Int      @default(0)
-
-//   createdAt DateTime @default(now())
-
-//   @@index([date])
-// }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
