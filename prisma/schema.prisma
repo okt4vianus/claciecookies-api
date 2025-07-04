@@ -181,7 +181,7 @@ model ShippingMethod {
 
   name        String // for label (show in UI): "Regular, Express, Same Day
   value       String  @unique // regular, express, same_day
-  description String?
+  description String // "Regular shipping takes 3-5 business days"
   price       Int // Rupiah/IDR
   isActive    Boolean @default(true) // Whether the shipping method is active
 
