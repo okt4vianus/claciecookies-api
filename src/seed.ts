@@ -2,7 +2,7 @@ import { dataProducts } from "~/modules/product/data";
 import { PrismaClient } from "~/generated/prisma";
 import { dataAddresses, dataUsers } from "~/modules/user/data";
 import { hashPassword } from "~/lib/password";
-import { dataShippingMethods } from "~/modules/shipping/data";
+import { dataShippingMethods } from "~/modules/shipping-method/data";
 import { dataPaymentMethods } from "./modules/payment/data";
 
 const prisma = new PrismaClient();
@@ -85,9 +85,7 @@ async function main() {
       include: { images: true },
     });
 
-    const imagesLog = upsertedProduct.images
-      .map((image) => image.name)
-      .join("\n \t\t");
+    const imagesLog = upsertedProduct.images.map((image) => image.name).join("\n \t\t");
 
     console.info(`
       🍪 Product: ${upsertedProduct.name} (${upsertedProduct.slug})
