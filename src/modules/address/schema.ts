@@ -4,6 +4,8 @@ import { phoneNumber } from "../common/schema";
 
 export const AddressSchema = BaseAddressSchema;
 
+export const AddressesSchema = z.array(BaseAddressSchema);
+
 export const UpdateAddressSchema = z.object({
   id: z.string(),
 

@@ -2,7 +2,11 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import { AddressSchema, UpdateAddressSchema } from "~/modules/address/schema";
+import {
+  AddressesSchema,
+  AddressSchema,
+  UpdateAddressSchema,
+} from "~/modules/address/schema";
 
 export const addressRoute = new OpenAPIHono();
 
@@ -36,6 +40,7 @@ addressRoute.openapi(
     try {
       const user = c.get("user");
 
+      // For one address, you can uncomment the following lines:
       const address = await prisma.address.findFirst({
         where: { userId: user.id, isDefault: true },
         take: 1,
@@ -43,6 +48,18 @@ addressRoute.openapi(
       if (!address) return c.json({ message: "Address not found" }, 404);
 
       return c.json(address, 200);
+
+      // for multiple addresses, you can use the following lines:
+      // const addresses = await prisma.address.findMany({
+      //   where: { userId: user.id },
+      //   orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+      // });
+
+      // if (!addresses || addresses.length === 0) {
+      //   return c.json({ message: "No addresses found" }, 404);
+      // }
+
+      // return c.json(addresses, 200);
     } catch (error) {
       return c.json(
         { message: "Failed to retrieve address", details: error },
