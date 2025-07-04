@@ -20,7 +20,7 @@ app.route("/address", addressRoute);
 app.route("/auth", authRoute);
 app.route("/search", searchRoute);
 app.route("/cart", cartRoute);
-app.route("/shipping", shippingRoute);
+app.route("/shipping-methods", shippingRoute);
 
 app
   .doc("/openapi.json", {
