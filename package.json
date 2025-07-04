@@ -2,8 +2,9 @@
   "name": "claciecookies-api",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun install && bun prisma migrate deploy && bun prisma generate --no-hints",
-    "start": "bun run src/index.ts",
+    "build": "bun install && bun db:migrate:deploy && bun db:gen",
+    "typecheck": "tsc --noEmit",
+    "start": "bun run src/index.js",
     "db:up": "docker compose up -d",
     "db:migrate": "bun prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
@@ -18,7 +19,7 @@
   },
   "dependencies": {
     "@hono/zod-openapi": "^0.19.6",
-    "@prisma/client": "^6.9.0",
+    "@prisma/client": "^6.11.1",
     "@scalar/hono-api-reference": "^0.8.5",
     "hono": "^4.7.8",
     "slugify": "^1.6.6",
@@ -26,7 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "prisma": "^6.9.0",
+    "prisma": "^6.11.1",
     "typescript": "^5.8.3"
   }
 }
