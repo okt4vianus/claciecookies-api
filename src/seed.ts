@@ -49,11 +49,11 @@ async function main() {
   // 3. Seed Shipping Methods
   console.log("\n🚚 Seeding Shipping Methods...");
   for (const shippingMethodData of dataShippingMethods) {
-    const { value, ...shipping } = shippingMethodData;
+    const { slug, ...shipping } = shippingMethodData;
     const upsertedShippingMethod = await prisma.shippingMethod.upsert({
-      where: { value },
+      where: { slug },
       update: { ...shipping },
-      create: { value, ...shipping },
+      create: { slug, ...shipping },
     });
     console.info(`✓ Shipping Method: ${upsertedShippingMethod.name}`);
   }
@@ -61,11 +61,11 @@ async function main() {
   // 4. Seed Payment Methods
   console.log("\n💳 Seeding Payment Methods...");
   for (const paymentMethodData of dataPaymentMethods) {
-    const { value, ...payment } = paymentMethodData;
+    const { slug, ...payment } = paymentMethodData;
     const upsertedPaymentMethod = await prisma.paymentMethod.upsert({
-      where: { value },
+      where: { slug },
       update: { ...payment },
-      create: { value, ...payment },
+      create: { slug, ...payment },
     });
     console.info(`✓ Payment Method: ${upsertedPaymentMethod.name}`);
   }

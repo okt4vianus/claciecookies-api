@@ -1,9 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import {
-  ShippingMethodSchema,
-  ShippingMethodsSchema,
-} from "~/modules/shipping-method/schema";
+import { ShippingMethodsSchema } from "~/modules/shipping-method/schema";
 
 export const shippingMethodRoute = new OpenAPIHono();
 
@@ -25,7 +22,7 @@ shippingMethodRoute.openapi(
   }),
   async (c) => {
     const shippingMethods = await prisma.shippingMethod.findMany({
-      orderBy: [{ id: "asc" }, { createdAt: "asc" }],
+      orderBy: [{ id: "asc" }],
     });
 
     return c.json(shippingMethods);
