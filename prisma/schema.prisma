@@ -180,13 +180,13 @@ model ShippingMethod {
   id String @id @default(ulid())
 
   name        String // for label (show in UI): "Regular, Express, Same Day
-  value       String  @unique // regular, express, same_day
+  slug        String  @unique // regular, express, same_day
   description String // "Regular shipping takes 3-5 business days"
   price       Int // Rupiah/IDR
   isActive    Boolean @default(true) // Whether the shipping method is active
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
 }
 
 // ============================
@@ -196,10 +196,10 @@ model PaymentMethod {
   id String @id @default(ulid())
 
   name        String // for label (show in UI):"Bank Transfer"
-  value       String  @unique // bank_transfer
+  slug        String  @unique // bank_transfer
   description String?
   isActive    Boolean @default(true)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // createdAt DateTime @default(now())
+  // updatedAt DateTime @updatedAt
 }
