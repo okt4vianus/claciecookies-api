@@ -63,14 +63,14 @@ model Address {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
-  label         String? // "Home", "Office", etc.
+  label         String // "Home", "Office", etc.
   recipientName String
   phone         String
   street        String
   city          String
-  province      String
+  province      String @default("Sulawesi Utara")
   postalCode    String
-  country       String  @default("Indonesia")
+  country       String @default("Indonesia")
 
   // Optional detailed location
   landmark String?
@@ -85,6 +85,8 @@ model Address {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([userId, label])
 }
 
 // ============================
