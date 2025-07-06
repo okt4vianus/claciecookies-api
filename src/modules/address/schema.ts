@@ -6,6 +6,15 @@ export const AddressSchema = BaseAddressSchema;
 
 export const AddressesSchema = z.array(BaseAddressSchema);
 
+export const CreateAddressSchema = AddressSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  province: z.string().optional(),
+  country: z.string().optional(),
+});
+
 export const UpdateAddressSchema = z.object({
   id: z.string(),
 

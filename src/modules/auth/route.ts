@@ -4,14 +4,13 @@ import { hashPassword, verifyPassword } from "~/lib/password";
 import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import { ErrorResponseSchema } from "~/modules/common/schema";
 import {
   LoginBodySchema,
   LoginResponseSchema,
   RegisterBodySchema,
 } from "~/modules/auth/schema";
+import { ErrorResponseSchema } from "~/modules/common/schema";
 import { PrivateUserProfileSchema } from "../user/schema";
-import { AddressSchema, UpdateAddressSchema } from "../address/schema";
 
 export const authRoute = new OpenAPIHono();
 
