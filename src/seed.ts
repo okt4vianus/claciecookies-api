@@ -10,9 +10,18 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting database seeding...\n");
 
+  /**
+   * TODO: Refactor each for loop to be functions
+   *
+   * async function main() {
+   *   await seedUsers();
+   *   await seedAddresses();
+   *   ...
+   * }
+   */
+
   // 1. Seed Users first and collect IDs
   console.log("👤 Seeding Users...");
-
   for (const userData of dataUsers) {
     const { password, ...user } = userData;
     const upsertedUser = await prisma.user.upsert({
@@ -36,13 +45,23 @@ async function main() {
     });
 
     if (user) {
-      const newAddress = await prisma.address.create({
-        data: {
+      const upsertedAddress = await prisma.address.upsert({
+        where: {
+          userId_label: {
+            userId: user.id,
+            label: address.label,
+          },
+        },
+        create: {
+          ...address,
+          userId: user.id,
+        },
+        update: {
           ...address,
           userId: user.id,
         },
       });
-      console.info(`✓ ${newAddress.label} for ${user.fullName}`);
+      console.info(`✓ ${upsertedAddress.label} for ${user.fullName}`);
     }
   }
 
@@ -85,9 +104,7 @@ async function main() {
       include: { images: true },
     });
 
-    const imagesLog = upsertedProduct.images
-      .map((image) => image.name)
-      .join("\n \t\t");
+    const imagesLog = upsertedProduct.images.map((image) => image.name).join("\n \t\t");
 
     console.info(`
       🍪 Product: ${upsertedProduct.name} (${upsertedProduct.slug})
