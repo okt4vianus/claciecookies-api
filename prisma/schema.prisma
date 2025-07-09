@@ -29,7 +29,7 @@ model User {
   phoneNumber         String?
   phoneNumberVerified Boolean @default(false)
 
-  //   avatar      String?
+  avatar String?
   //   isActive    Boolean   @default(true)
   //   role        UserRole  @default(CUSTOMER)
 
@@ -67,7 +67,7 @@ model Address {
 
   label         String // "Home", "Office", etc.
   recipientName String
-  phone         String
+  phoneNumber   String
   street        String
   city          String
   province      String @default("Sulawesi Utara")

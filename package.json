@@ -6,6 +6,7 @@
     "typecheck": "tsc --noEmit --skipLibCheck",
     "start": "bun run src/index.ts",
     "db:up": "docker compose up -d",
+    "db:push": "prisma db push",
     "db:migrate": "bun prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
