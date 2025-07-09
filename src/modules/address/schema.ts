@@ -22,7 +22,7 @@ export const UpdateAddressSchema = z.object({
 
   recipientName: z.string().min(5, "Recipient name is required"),
 
-  phone: phoneNumber,
+  phoneNumber: phoneNumber,
 
   street: z.string().min(10, "Street address is required"),
 
