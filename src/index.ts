@@ -9,6 +9,7 @@ import { productsRoute } from "~/modules/product/route";
 import { searchRoute } from "~/modules/search/route";
 import { usersRoute } from "~/modules/user/route";
 import { shippingMethodRoute } from "~/modules/shipping-method/route";
+import { paymentMethodRoute } from "./modules/payment-method/route";
 
 const app = new OpenAPIHono();
 
@@ -21,6 +22,7 @@ app.route("/auth", authRoute);
 app.route("/search", searchRoute);
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
+app.route("/payment-methods", paymentMethodRoute);
 
 app
   .doc("/openapi.json", {

@@ -3,7 +3,7 @@ import { PrismaClient } from "~/generated/prisma";
 import { dataAddresses, dataUsers } from "~/modules/user/data";
 import { hashPassword } from "~/lib/password";
 import { dataShippingMethods } from "~/modules/shipping-method/data";
-import { dataPaymentMethods } from "./modules/payment/data";
+import { dataPaymentMethods } from "./modules/payment-method/data";
 import { seedUsers } from "../prisma/seed/seed-users";
 import { seedAddresses } from "../prisma/seed/seed-addresses";
 import { seedShippingMethods } from "../prisma/seed/seed-shipping-methods";

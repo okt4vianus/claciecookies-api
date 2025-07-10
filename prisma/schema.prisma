@@ -203,7 +203,7 @@ model PaymentMethod {
 
   name        String // for label (show in UI):"Bank Transfer"
   slug        String  @unique // bank_transfer
-  description String?
+  description String
   isActive    Boolean @default(true)
 
   // createdAt DateTime @default(now())
