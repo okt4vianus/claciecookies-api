@@ -49,6 +49,7 @@ cartRoute.openapi(
       });
       return c.json(newCart);
     }
+
     return c.json(cart);
   }
 );

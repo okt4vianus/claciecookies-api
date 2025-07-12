@@ -2,12 +2,7 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import {
-  AddressesSchema,
-  AddressSchema,
-  CreateAddressSchema,
-  UpdateAddressSchema,
-} from "~/modules/address/schema";
+import { AddressesSchema, AddressSchema, CreateAddressSchema, UpdateAddressSchema } from "~/modules/address/schema";
 
 export const addressRoute = new OpenAPIHono();
 
@@ -27,10 +22,6 @@ addressRoute.openapi(
         description: "Successfully retrieved authenticated user",
         content: { "application/json": { schema: AddressSchema } },
       },
-      404: {
-        description: "User not found",
-        content: { "application/json": { schema: ErrorResponseSchema } },
-      },
       500: {
         description: "Internal server error",
         content: { "application/json": { schema: ErrorResponseSchema } },
@@ -45,64 +36,27 @@ addressRoute.openapi(
         where: { userId: user.id, isDefault: true },
         take: 1,
       });
-      if (!address) return c.json({ message: "Address not found" }, 404);
+
+      if (!address) {
+        const newAddress = await prisma.address.create({
+          data: {
+            isDefault: true,
+            userId: user.id,
+            label: "Rumah",
+            recipientName: user.fullName,
+            phoneNumber: user.phoneNumber || "+62",
+            street: "",
+            city: "",
+            postalCode: "",
+          },
+        });
+
+        return c.json(newAddress, 200);
+      }
 
       return c.json(address, 200);
     } catch (error) {
-      return c.json(
-        { message: "Failed to retrieve address", details: error },
-        500
-      );
-    }
-  }
-);
-
-// GET /addresses
-addressRoute.openapi(
-  createRoute({
-    tags,
-    summary: "Get addresses of the auth user",
-    method: "get",
-    path: "/addresses",
-    security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
-    responses: {
-      200: {
-        description: "Successfully retrieved addresses",
-        content: { "application/json": { schema: AddressesSchema } },
-      },
-      404: {
-        description: "User not found",
-        content: { "application/json": { schema: ErrorResponseSchema } },
-      },
-      500: {
-        description: "Internal server error",
-        content: { "application/json": { schema: ErrorResponseSchema } },
-      },
-    },
-  }),
-  async (c) => {
-    try {
-      const user = c.get("user");
-
-      if (!user) {
-        return c.json({ message: "User not found" }, 404);
-      }
-
-      const addresses = await prisma.address.findMany({
-        where: { userId: user.id },
-        orderBy: [{ createdAt: "asc" }],
-      });
-      if (!addresses || addresses.length === 0) {
-        return c.json({ message: "No addresses found" }, 404);
-      }
-
-      return c.json(addresses, 200);
-    } catch (error) {
-      return c.json(
-        { message: "Failed to retrieve addresses", details: error },
-        500
-      );
+      return c.json({ message: "Failed to get address", details: error }, 500);
     }
   }
 );
@@ -179,10 +133,7 @@ addressRoute.openapi(
 
       return c.json(newAddress, 201);
     } catch (error) {
-      return c.json(
-        { message: "Failed to create address", details: error },
-        500
-      );
+      return c.json({ message: "Failed to create address", details: error }, 500);
     }
   }
 );

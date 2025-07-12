@@ -4,13 +4,10 @@ import { hashPassword, verifyPassword } from "~/lib/password";
 import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import {
-  LoginBodySchema,
-  LoginResponseSchema,
-  RegisterBodySchema,
-} from "~/modules/auth/schema";
+import { LoginBodySchema, LoginResponseSchema, RegisterBodySchema } from "~/modules/auth/schema";
 import { ErrorResponseSchema } from "~/modules/common/schema";
 import { PrivateUserProfileSchema } from "../user/schema";
+import { AddressesSchema } from "../address/schema";
 
 export const authRoute = new OpenAPIHono();
 
@@ -57,10 +54,7 @@ authRoute.openapi(
 
       return c.json(newUser, 201);
     } catch (error) {
-      return c.json(
-        { message: "Failed to registering user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to registering user", details: error }, 500);
     }
   }
 );
@@ -99,28 +93,21 @@ authRoute.openapi(
       });
 
       if (!user) {
-        return c.json(
-          { field: "email", message: "User not found", error: null },
-          400
-        );
+        return c.json({ field: "email", message: "User not found", error: null }, 400);
       }
 
       if (!user.password) {
         return c.json(
           {
             field: "password",
-            message:
-              "User does not have a password. Might have login with Google.",
+            message: "User does not have a password. Might have login with Google.",
             error: null,
           },
           400
         );
       }
 
-      const isPasswordValid = await verifyPassword(
-        password,
-        user.password.hash
-      );
+      const isPasswordValid = await verifyPassword(password, user.password.hash);
 
       if (!isPasswordValid) {
         return c.json(
@@ -139,10 +126,7 @@ authRoute.openapi(
 
       const token = await signToken(userWithoutPassword.id);
       if (!token) {
-        return c.json(
-          { message: "Failed to generate token", error: null },
-          400
-        );
+        return c.json({ message: "Failed to generate token", error: null }, 400);
       }
 
       c.header("Token", token);
@@ -189,10 +173,7 @@ authRoute.openapi(
       return c.json(user, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
   }
 );
@@ -264,10 +245,7 @@ authRoute.openapi(
       return c.json(userProfile, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
   }
 );
@@ -301,5 +279,52 @@ authRoute.openapi(
       data: userData,
     });
     return c.json(userProfile);
+  }
+);
+
+// GET /auth/addresses
+authRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Get addresses of the auth user",
+    method: "get",
+    path: "/addresses",
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    responses: {
+      200: {
+        description: "Successfully retrieved addresses",
+        content: { "application/json": { schema: AddressesSchema } },
+      },
+      404: {
+        description: "User not found",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+      500: {
+        description: "Internal server error",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+
+      if (!user) {
+        return c.json({ message: "User not found" }, 404);
+      }
+
+      const addresses = await prisma.address.findMany({
+        where: { userId: user.id },
+        orderBy: [{ createdAt: "asc" }],
+      });
+      if (!addresses || addresses.length === 0) {
+        return c.json({ message: "No addresses found" }, 404);
+      }
+
+      return c.json(addresses, 200);
+    } catch (error) {
+      return c.json({ message: "Failed to retrieve addresses", details: error }, 500);
+    }
   }
 );
