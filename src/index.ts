@@ -18,8 +18,8 @@ app.use(logger());
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
 app.route("/address", addressRoute);
-app.route("/auth", authRoute);
-app.route("/search", searchRoute);
+app.route("/auth", authRoute); // model: User
+app.route("/search", searchRoute); // model: Products
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
