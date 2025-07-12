@@ -206,6 +206,8 @@ model PaymentMethod {
   description String
   isActive    Boolean @default(true)
 
+  orders Order[]
+
   // createdAt DateTime @default(now())
   // updatedAt DateTime @updatedAt
 }
@@ -214,44 +216,53 @@ model PaymentMethod {
 // ORDER MANAGEMENT
 // ============================
 model Order {
-  id          String @id @default(ulid())
-  orderNumber String @unique // ORD-2025-001
-  userId      String
+  id String @id @default(ulid())
 
-  // user User @relation(fields: [userId], references: [id])
-  user          User   @relation(fields: [userId], references: [id])
-  // Order details
-  status        String
-  paymentStatus String
-  paymentMethod String
+  status      OrderStatus @default(PENDING)
+  orderNumber String      @unique // ORD-2025-001
 
-  // Pricing
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
+  shippingAddressId String
+
+  notes          String  @default("") // Copy from shippingAddress.notes
+  trackingNumber String?
+  courier        String? // "Regular", "Express"
+  // TODO: Need model Courier
+
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  paymentMethodId String
+  // TODO: Detail for payment details when there's payment gateway
+
+  orderItems OrderItem[] // Copy CartItem into OrderItem
+
   subtotal     Int // Before shipping
   shippingCost Int @default(0)
   discount     Int @default(0)
   totalAmount  Int
 
-  // Shipping information
-  shippingAddressId String
-  shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
-
-  // Tracking
-  trackingNumber String?
-  carrier        String? // "Regular", "Express"
-
-  // Timestamps for order lifecycle
+  // Use this when status has been changed
+  paidAt      DateTime?
   confirmedAt DateTime?
   shippedAt   DateTime?
   deliveredAt DateTime?
   cancelledAt DateTime?
+  returnedAt  DateTime?
 
-  notes String? // Special instructions
-
-  // Relations
-  orderItems OrderItem[]
-
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) // Default on created or pending
   updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING // order created, awaiting payment
+  PAID // payment received, not yet processed
+  CONFIRMED // verified, being prepared
+  SHIPPED // handed to courier
+  DELIVERED // confirmed delivery
+  CANCELLED // cancelled before fulfillment
+  RETURNED // returned by user after delivery
 }
 
 model OrderItem {
