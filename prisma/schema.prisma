@@ -206,6 +206,7 @@ model PaymentMethod {
   description String
   isActive    Boolean @default(true)
 
+  orders Order[]
   // createdAt DateTime @default(now())
   // updatedAt DateTime @updatedAt
 }
@@ -214,16 +215,33 @@ model PaymentMethod {
 // ORDER MANAGEMENT
 // ============================
 model Order {
-  id          String @id @default(ulid())
-  orderNumber String @unique // ORD-2025-001
-  userId      String
+  id String @id @default(ulid())
 
-  // user User @relation(fields: [userId], references: [id])
-  user          User   @relation(fields: [userId], references: [id])
-  // Order details
-  status        String
-  paymentStatus String
-  paymentMethod String
+  status      OrderStatus @default(PENDING)
+  orderNumber String      @unique // ORD-2025-001
+
+  // Customer Info
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Shipping-Address Info
+  shippingAddressId String
+  shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
+
+  notes String @default("") // Special instructions, can copy from shippingAddress.notes
+
+  // Shipping-Method Info
+  trackingNumber String?
+  courier        String? // "Regular", "Express", "Same Day"
+  // TODO: Need model Courier
+
+  // Payment Info
+  paymentMethodId String
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+
+  // TODO: Detail for payment when there is payment gateway
+
+  orderItems OrderItem[] // Copy CartItem into OrderItem
 
   // Pricing
   subtotal     Int // Before shipping
@@ -231,27 +249,26 @@ model Order {
   discount     Int @default(0)
   totalAmount  Int
 
-  // Shipping information
-  shippingAddressId String
-  shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
-
-  // Tracking
-  trackingNumber String?
-  carrier        String? // "Regular", "Express"
-
-  // Timestamps for order lifecycle
+  // Use this when status has been changed
+  paidAt      DateTime?
   confirmedAt DateTime?
   shippedAt   DateTime?
   deliveredAt DateTime?
   cancelledAt DateTime?
+  returnedAt  DateTime?
 
-  notes String? // Special instructions
-
-  // Relations
-  orderItems OrderItem[]
-
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) // Default on created or pending
   updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING // order created, awaiting payment
+  PAID // payment received, not yet processed
+  CONFIRM // verified, being prepared
+  SHIPPED // handle to courier
+  DELIVERED // confirm delivery
+  CANCELLED // canceled before fulfillment
+  RETURN // returned by user after delivery
 }
 
 model OrderItem {
