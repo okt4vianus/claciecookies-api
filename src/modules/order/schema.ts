@@ -2,6 +2,7 @@ import { z } from "zod";
 import { OrderSchema as BaseOrderSchema } from "~/generated/zod";
 
 // Order Item Schema
+// TODO: Simplify by removing the ones already provided by generatod/zod
 export const OrderItemSchema = z.object({
   id: z.string(),
   orderId: z.string(),
@@ -11,8 +12,9 @@ export const OrderItemSchema = z.object({
   subtotal: z.number().positive(),
   product: z.object({
     id: z.string(),
-    name: z.string(),
     slug: z.string(),
+    name: z.string(),
+    description: z.string(),
     price: z.number(),
     images: z
       .array(
@@ -23,6 +25,7 @@ export const OrderItemSchema = z.object({
         })
       )
       .optional(),
+    stockQuantity: z.number(),
   }),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),

@@ -18,7 +18,9 @@ ordersRoute.openapi(
     security: [{ BearerAuth: [] }],
     middleware: checkAuthorized,
     request: {
-      body: { content: { "application/json": { schema: CreateNewOrderSchema } } },
+      body: {
+        content: { "application/json": { schema: CreateNewOrderSchema } },
+      },
     },
     responses: {
       201: {
@@ -70,29 +72,24 @@ ordersRoute.openapi(
         where: { slug: body.paymentMethodSlug },
       });
       if (!paymentMethod) {
-        return c.json({ message: "Shipping method not found" }, 400);
+        return c.json({ message: "Payment method not found" }, 400);
       }
 
-      const shippingCost = shippingMethod?.price;
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const shippingCost = shippingMethod.price;
       const totalAmount = cart.totalPrice + shippingCost;
 
-      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-
+      // Create the order
       const newOrder = await prisma.order.create({
         data: {
           status: "PENDING",
           orderNumber,
-
           userId: user.id,
-
-          shippingAddressId: address.id, // TODO: Will copy the address
+          shippingAddressId: address.id,
           notes: address.notes || "",
-
           courier: null,
           trackingNumber: null,
-
           paymentMethodId: paymentMethod.id,
-
           orderItems: {
             createMany: {
               data: cart.items.map((item) => ({
@@ -103,18 +100,60 @@ ordersRoute.openapi(
               })),
             },
           },
-
-          subTotal: 0,
+          subTotal: cart.totalPrice,
           shippingCost,
           discount: 0,
           totalAmount,
         },
+        include: {
+          orderItems: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  slug: true,
+                  price: true,
+                  images: true,
+                  description: true,
+                  stockQuantity: true,
+                },
+              },
+            },
+          },
+          shippingAddress: true,
+          paymentMethod: true,
+        },
       });
 
-      return c.json(newOrder, 201);
+      // Format the response to match OrderSchema
+      const response = {
+        ...newOrder,
+        subtotalAmount: newOrder.subTotal, // Map subTotal to subtotalAmount for the response
+        orderItems: newOrder.orderItems.map((item) => ({
+          ...item,
+          subtotal: item.total, // Map total to subtotal for each order item
+          product: {
+            id: item.product.id,
+            name: item.product.name,
+            slug: item.product.slug,
+            price: item.product.price,
+            description: item.product.description || "",
+            images: item.product.images || [],
+            stockQuantity: item.product.stockQuantity || 0,
+          },
+        })),
+      };
+
+      return c.json(response, 201);
     } catch (error) {
       console.error("Create new order error:", error);
-      return c.json({ message: "Failed to create new order", error }, 500);
+      return c.json(
+        {
+          message: "Failed to create new order",
+        },
+        500
+      );
     }
   }
 );

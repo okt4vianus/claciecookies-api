@@ -123,11 +123,11 @@ model Product {
   // totalSold     Int @default(0) // Total quantity sold
 
   // Relations
-  cartItem CartItem[] // TODO: change to lowercase cartitem
+  cartItem   CartItem[] // TODO: change to lowercase cartitem
+  orderItems OrderItem[]
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  OrderItem OrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ProductImage {
