@@ -244,7 +244,7 @@ model Order {
   orderItems OrderItem[] // Copy CartItem into OrderItem
 
   // Pricing
-  subtotal     Int // Before shipping
+  subTotal     Int // Before shipping
   shippingCost Int @default(0)
   discount     Int @default(0)
   totalAmount  Int
