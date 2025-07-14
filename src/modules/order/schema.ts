@@ -72,14 +72,13 @@ export const OrderSchema = z.object({
 });
 
 // Create Order Schema (for POST request)
-export const CreateOrderSchema = z.object({
-  userId: z.string(),
-  cartId: z.string(),
-  shippingAddressId: z.string(),
-  notes: z.string().optional(),
-  shippingMethod: z.enum(["regular", "express", "same_day"]),
-  paymentMethod: z.string(),
+export const CreateNewOrderSchema = z.object({
+  addressId: z.string(),
+  shippingMethodSlug: z.enum(["regular", "express", "same_day"]),
+  paymentMethodSlug: z.enum(["bank_transfer", "e_wallet", "cod"]),
+  // User Profile and Latest Cart from database
 });
+
 
 // Order List Schema
 export const OrderListSchema = z.array(OrderSchema);
