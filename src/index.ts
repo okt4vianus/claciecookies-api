@@ -10,6 +10,7 @@ import { searchRoute } from "~/modules/search/route";
 import { usersRoute } from "~/modules/user/route";
 import { shippingMethodRoute } from "~/modules/shipping-method/route";
 import { paymentMethodRoute } from "./modules/payment-method/route";
+import { ordersRoute } from "./modules/order/route";
 
 const app = new OpenAPIHono();
 
@@ -18,11 +19,12 @@ app.use(logger());
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
 app.route("/address", addressRoute);
-app.route("/auth", authRoute);
-app.route("/search", searchRoute);
+app.route("/auth", authRoute); // model: User
+app.route("/search", searchRoute); // model: Products
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
+app.route("/order", ordersRoute);
 
 app
   .doc("/openapi.json", {

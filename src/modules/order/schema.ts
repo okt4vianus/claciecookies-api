@@ -73,15 +73,12 @@ export const OrderSchema = z.object({
 
 // Create Order Schema (for POST request)
 export const CreateOrderSchema = z.object({
-  fullName: z.string().min(1, "Nama lengkap wajib diisi"),
-  email: z.string().email("Format email tidak valid"),
-  phone: z.string().min(10, "Nomor telepon minimal 10 digit"),
-  address: z.string().min(10, "Alamat minimal 10 karakter"),
-  city: z.string().min(1, "Kota wajib diisi"),
-  postalCode: z.string().min(5, "Kode pos minimal 5 digit"),
-  shippingMethod: z.enum(["regular", "express", "same_day"]),
-  paymentMethod: z.enum(["bank_transfer", "e_wallet", "cod"]),
+  userId: z.string(),
+  cartId: z.string(),
+  shippingAddressId: z.string(),
   notes: z.string().optional(),
+  shippingMethod: z.enum(["regular", "express", "same_day"]),
+  paymentMethod: z.string(),
 });
 
 // Order List Schema
