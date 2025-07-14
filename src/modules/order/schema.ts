@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { OrderSchema as BaseOrderSchema } from "~/generated/zod";
 
 // Order Item Schema
 export const OrderItemSchema = z.object({
@@ -28,47 +29,11 @@ export const OrderItemSchema = z.object({
 });
 
 // Order Schema
-export const OrderSchema = z.object({
-  id: z.string(),
-  orderNumber: z.string(),
-  userId: z.string(),
-  status: z.enum([
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ]),
+export const OrderSchema = BaseOrderSchema.extend({
   totalAmount: z.number().positive(),
   subtotalAmount: z.number().positive(),
   shippingCost: z.number().nonnegative(),
-
-  // Customer Information
-  customerName: z.string(),
-  customerEmail: z.string().email(),
-  customerPhone: z.string(),
-
-  // Shipping Information
-  shippingAddress: z.string(),
-  shippingCity: z.string(),
-  shippingPostalCode: z.string(),
-  shippingMethod: z.enum(["regular", "express", "same_day"]),
-
-  // Payment Information
-  paymentMethod: z.enum(["bank_transfer", "e_wallet", "cod"]),
-  paymentStatus: z.enum(["pending", "paid", "failed", "cancelled"]),
-
-  // Optional fields
-  notes: z.string().optional(),
-  trackingNumber: z.string().optional(),
-
-  // Order Items
-  items: z.array(OrderItemSchema),
-
-  // Timestamps
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  orderItems: z.array(OrderItemSchema),
 });
 
 // Create Order Schema (for POST request)
@@ -79,26 +44,15 @@ export const CreateNewOrderSchema = z.object({
   // User Profile and Latest Cart from database
 });
 
-
 // Order List Schema
 export const OrderListSchema = z.array(OrderSchema);
 
 // Update Order Status Schema
 export const UpdateOrderStatusSchema = z.object({
-  status: z.enum([
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ]),
+  status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
 });
 
 // Param Schema
 export const ParamOrderIdSchema = z.object({
   id: z.string().min(1, "Order ID is required"),
 });
-
-// Checkout Schema (sama dengan CreateOrderSchema, tapi untuk frontend)
-export const CheckoutSchema = CreateOrderSchema;
