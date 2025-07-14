@@ -123,11 +123,11 @@ model Product {
   // totalSold     Int @default(0) // Total quantity sold
 
   // Relations
-  cartItem CartItem[] // TODO: change to lowercase cartitem
+  cartItem   CartItem[] // TODO: change to lowercase cartitem
+  orderItems OrderItem[]
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  OrderItem OrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ProductImage {
@@ -191,9 +191,10 @@ model ShippingMethod {
   price       Int // Rupiah/IDR
   isActive    Boolean @default(true) // Whether the shipping method is active
 
-  // createdAt DateTime @default(now())
-  // updatedAt DateTime @updatedAt
+  // orders Order[]
 }
+
+// model Courier {}
 
 // ============================
 // PAYMENT MANAGEMENT  
@@ -227,13 +228,14 @@ model Order {
   // Shipping-Address Info
   shippingAddressId String
   shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
+  notes             String  @default("") // Special instructions, can copy from shippingAddress.notes
 
-  notes String @default("") // Special instructions, can copy from shippingAddress.notes
-
+  // TODO: Need to enable shippingMethod and model Courier
+  // shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id]) // Express, etc
+  // shippingMethodId String?
+  courier        String? // "GoSend", "GrabExpress", "Paxel", "JNE", etc
   // Shipping-Method Info
   trackingNumber String?
-  courier        String? // "Regular", "Express", "Same Day"
-  // TODO: Need model Courier
 
   // Payment Info
   paymentMethodId String
@@ -257,7 +259,7 @@ model Order {
   cancelledAt DateTime?
   returnedAt  DateTime?
 
-  createdAt DateTime @default(now()) // Default on created or pending
+  createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
