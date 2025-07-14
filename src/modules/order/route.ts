@@ -2,11 +2,11 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import {
-  CreateOrderSchema,
   OrderSchema,
   OrderListSchema,
   ParamOrderIdSchema,
   UpdateOrderStatusSchema,
+  CreateNewOrderSchema,
 } from "~/modules/order/schema";
 import {
   ErrorResponseSchema,
@@ -116,7 +116,7 @@ ordersRoute.openapi(
     middleware: checkAuthorized,
     request: {
       body: {
-        content: { "application/json": { schema: CreateOrderSchema } },
+        content: { "application/json": { schema: CreateNewOrderSchema } },
       },
     },
     responses: {
