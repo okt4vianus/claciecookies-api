@@ -1,15 +1,8 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import {
-  CreateNewOrderSchema,
-  OrderSchema,
-  ParamOrderIdSchema,
-} from "~/modules/order/schema";
-import {
-  ErrorResponseSchema,
-  SuccessResponseSchema,
-} from "~/modules/common/schema";
+import { CreateNewOrderSchema, OrderSchema, ParamOrderIdSchema } from "~/modules/order/schema";
+import { ErrorResponseSchema, SuccessResponseSchema } from "~/modules/common/schema";
 
 export const ordersRoute = new OpenAPIHono();
 
@@ -80,10 +73,7 @@ ordersRoute.openapi(
         return c.json({ message: "Payment method not found" }, 400);
       }
 
-      const orderNumber = `ORD-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase()}`;
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const shippingCost = shippingMethod.price;
       const totalAmount = cart.totalPrice + shippingCost;
 
@@ -159,11 +149,11 @@ ordersRoute.openapi(
   }
 );
 
-// GET /orders/:id
+// GET /orders/{id}
 ordersRoute.openapi(
   createRoute({
     method: "get",
-    path: "/:id",
+    path: "/{id}",
     summary: "Get order by ID",
     tags,
     security: [{ BearerAuth: [] }],
@@ -174,15 +164,9 @@ ordersRoute.openapi(
     responses: {
       200: {
         description: "Get Order detail by id",
-        content: {
-          "application/json": {
-            schema: OrderSchema,
-          },
-        },
+        content: { "application/json": { schema: OrderSchema } },
       },
-      404: {
-        description: "Order not found",
-      },
+      404: { description: "Order not found" },
     },
   }),
   async (c) => {
@@ -195,63 +179,18 @@ ordersRoute.openapi(
         include: {
           shippingAddress: true,
           paymentMethod: true,
-          orderItems: {
-            include: {
-              product: {
-                include: {
-                  images: true,
-                },
-              },
-            },
-          },
+          orderItems: { include: { product: { include: { images: true } } } },
         },
       });
 
       if (!order || order.userId !== user.id) {
-        return c.json({ message: "Order not found" }, 404);
+        return c.json({ message: `Order by id ${id} not found` }, 404);
       }
-      return c.json(order);
 
-      // return c.json({
-      //   id: order.id,
-      //   orderNumber: order.orderNumber,
-      //   status: order.status,
-      //   createdAt: order.createdAt,
-      //   subTotal: order.subTotal,
-      //   shippingCost: order.shippingCost,
-      //   totalAmount: order.totalAmount,
-      //   shippingAddress: {
-      //     recipientName: order.shippingAddress.recipientName,
-      //     phoneNumber: order.shippingAddress.phoneNumber,
-      //     street: order.shippingAddress.street,
-      //     city: order.shippingAddress.city,
-      //     province: order.shippingAddress.province,
-      //     postalCode: order.shippingAddress.postalCode,
-      //   },
-      //   paymentMethod: {
-      //     name: order.paymentMethod.name,
-      //   },
-      //   orderItems: order.orderItems.map((item) => ({
-      //     id: item.id,
-      //     quantity: item.quantity,
-      //     price: item.price,
-      //     total: item.total,
-      //     product: {
-      //       id: item.product.id,
-      //       name: item.product.name,
-      //       slug: item.product.slug,
-      //       price: item.product.price,
-      //       stockQuantity: item.product.stockQuantity,
-      //       description: item.product.description,
-      //       images: item.product.images.map((img) => ({
-      //         url: img.url,
-      //       })),
-      //     },
-      //   })),
-      // });
+      return c.json(order);
     } catch (error) {
-      console.error("[GET /orders/:id] Error:", error);
-      return c.json({ message: "Failed to fetch order" }, 500);
+      console.error("[GET /orders/{id}] Error:", error);
+      return c.json({ message: "Failed to get order by id" }, 500);
     }
   }
 );
