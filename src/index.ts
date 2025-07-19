@@ -19,12 +19,13 @@ app.use(logger());
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
 app.route("/address", addressRoute);
-app.route("/auth", authRoute); // model: User
 app.route("/search", searchRoute); // model: Products
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
 app.route("/orders", ordersRoute);
+
+app.route("/auth", authRoute); // Our own Auth solution with model: User
 
 app
   .doc("/openapi.json", {
