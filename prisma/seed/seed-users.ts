@@ -13,6 +13,6 @@ export async function seedUsers() {
         password: { create: { hash: await hashPassword(password) } },
       },
     });
-    console.info(`✓ User: ${upsertedUser.fullName} (${upsertedUser.email})`);
+    console.info(`✓ User: ${upserteduser.name} (${upsertedUser.email})`);
   }
 }

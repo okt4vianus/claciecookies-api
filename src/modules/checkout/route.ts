@@ -12,8 +12,7 @@ const tags = ["Checkout"];
 checkoutRoute.openapi(
   createRoute({
     tags,
-    summary:
-      "Get checkout page data (profile, cart, address, shipping-methods, payment-methods)",
+    summary: "Get checkout page data (profile, cart, address, shipping-methods, payment-methods)",
     method: "get",
     path: "/checkout",
     security: [{ BearerAuth: [] }],
@@ -51,16 +50,16 @@ checkoutRoute.openapi(
 
     try {
       // Get user profile
-      const profile = await prisma.user.findUnique({
+      const foundUser = await prisma.user.findUnique({
         where: { id: user.id },
         select: {
-          fullName: true,
+          name: true,
           email: true,
           phoneNumber: true,
         },
       });
 
-      if (!profile) {
+      if (!foundUser) {
         return c.json({ message: "User not found" }, 401);
       }
 
@@ -92,8 +91,8 @@ checkoutRoute.openapi(
             isDefault: true,
             userId: user.id,
             label: "Rumah",
-            recipientName: profile.fullName,
-            phoneNumber: profile.phoneNumber || "+62",
+            recipientName: foundUser.name,
+            phoneNumber: foundUser.phoneNumber || "+62",
             street: "",
             city: "",
             postalCode: "",
@@ -112,7 +111,7 @@ checkoutRoute.openapi(
       ]);
 
       return c.json({
-        profile,
+        profile: foundUser,
         cart,
         address,
         shippingMethods,
