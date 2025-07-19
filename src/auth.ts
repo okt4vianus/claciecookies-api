@@ -46,11 +46,8 @@ export const auth = betterAuth({
 
   plugins: [
     openAPI(),
-
-    // username(),
-    // phoneNumber({
-    //   sendOTP: ({ phoneNumber, code }, request) => {
-    //   },
-    // }),
+    username(),
+    phoneNumber(),
+    // ...
   ],
 });

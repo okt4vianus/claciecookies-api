@@ -26,8 +26,11 @@ model User {
   emailVerified Boolean
   image         String?
 
-  // phoneNumber
-  // phoneNumberVerified
+  username        String? @unique // "oktavianus" case sensitive, normalized
+  displayUsername String? // "Oktavianus" case insensitive
+
+  phoneNumber         String?  @unique
+  phoneNumberVerified Boolean? @default(false)
 
   sessions Session[]
   accounts Account[]
