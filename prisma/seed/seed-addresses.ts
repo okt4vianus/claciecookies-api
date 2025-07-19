@@ -27,7 +27,7 @@ export async function seedAddresses() {
           userId: user.id,
         },
       });
-      console.info(`✓ ${upsertedAddress.label} for ${user.fullName}`);
+      console.info(`✓ ${upsertedAddress.label} for ${user.name}`);
     }
   }
 }
