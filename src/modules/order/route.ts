@@ -1,8 +1,15 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import { CreateNewOrderSchema, OrderSchema } from "~/modules/order/schema";
-import { ErrorResponseSchema } from "~/modules/common/schema";
+import {
+  CreateNewOrderSchema,
+  OrderSchema,
+  ParamOrderIdSchema,
+} from "~/modules/order/schema";
+import {
+  ErrorResponseSchema,
+  SuccessResponseSchema,
+} from "~/modules/common/schema";
 
 export const ordersRoute = new OpenAPIHono();
 
@@ -148,6 +155,103 @@ ordersRoute.openapi(
     } catch (error) {
       console.error("Create new order error:", error);
       return c.json({ message: "Failed to create new order" }, 500);
+    }
+  }
+);
+
+// GET /orders/:id
+ordersRoute.openapi(
+  createRoute({
+    method: "get",
+    path: "/:id",
+    summary: "Get order by ID",
+    tags,
+    security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
+    request: {
+      params: ParamOrderIdSchema,
+    },
+    responses: {
+      200: {
+        description: "Get Order detail by id",
+        content: {
+          "application/json": {
+            schema: OrderSchema,
+          },
+        },
+      },
+      404: {
+        description: "Order not found",
+      },
+    },
+  }),
+  async (c) => {
+    const user = c.get("user");
+    const { id } = c.req.valid("param");
+
+    try {
+      const order = await prisma.order.findUnique({
+        where: { id },
+        include: {
+          shippingAddress: true,
+          paymentMethod: true,
+          orderItems: {
+            include: {
+              product: {
+                include: {
+                  images: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!order || order.userId !== user.id) {
+        return c.json({ message: "Order not found" }, 404);
+      }
+      return c.json(order);
+
+      // return c.json({
+      //   id: order.id,
+      //   orderNumber: order.orderNumber,
+      //   status: order.status,
+      //   createdAt: order.createdAt,
+      //   subTotal: order.subTotal,
+      //   shippingCost: order.shippingCost,
+      //   totalAmount: order.totalAmount,
+      //   shippingAddress: {
+      //     recipientName: order.shippingAddress.recipientName,
+      //     phoneNumber: order.shippingAddress.phoneNumber,
+      //     street: order.shippingAddress.street,
+      //     city: order.shippingAddress.city,
+      //     province: order.shippingAddress.province,
+      //     postalCode: order.shippingAddress.postalCode,
+      //   },
+      //   paymentMethod: {
+      //     name: order.paymentMethod.name,
+      //   },
+      //   orderItems: order.orderItems.map((item) => ({
+      //     id: item.id,
+      //     quantity: item.quantity,
+      //     price: item.price,
+      //     total: item.total,
+      //     product: {
+      //       id: item.product.id,
+      //       name: item.product.name,
+      //       slug: item.product.slug,
+      //       price: item.product.price,
+      //       stockQuantity: item.product.stockQuantity,
+      //       description: item.product.description,
+      //       images: item.product.images.map((img) => ({
+      //         url: img.url,
+      //       })),
+      //     },
+      //   })),
+      // });
+    } catch (error) {
+      console.error("[GET /orders/:id] Error:", error);
+      return c.json({ message: "Failed to fetch order" }, 500);
     }
   }
 );

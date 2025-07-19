@@ -64,5 +64,5 @@ export const UpdateOrderStatusSchema = z.object({
 
 // Param Schema
 export const ParamOrderIdSchema = z.object({
-  id: z.string().min(1, "Order ID is required"),
+  id: z.string().min(3, "Order ID is required"),
 });

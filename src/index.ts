@@ -24,7 +24,7 @@ app.route("/search", searchRoute); // model: Products
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
-app.route("/order", ordersRoute);
+app.route("/orders", ordersRoute);
 
 app
   .doc("/openapi.json", {
