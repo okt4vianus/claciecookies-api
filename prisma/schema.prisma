@@ -17,48 +17,81 @@ generator zod {
 // ============================
 // USER MANAGEMENT
 // ============================
+
 model User {
   id String @id @default(ulid())
 
-  fullName String
-  username String @unique
-
+  name          String
   email         String  @unique
-  emailVerified Boolean @default(false)
+  emailVerified Boolean
+  image         String?
 
-  phoneNumber         String?
-  phoneNumberVerified Boolean @default(false)
+  // phoneNumber
+  // phoneNumberVerified
 
-  avatar String?
-  //   isActive    Boolean   @default(true)
-  //   role        UserRole  @default(CUSTOMER)
+  sessions Session[]
+  accounts Account[]
 
-  // Relations
-  password  Password?
-  cart      Cart? // TODO: change to lowercase cart
   addresses Address[]
+  carts     Cart[]
+  orders    Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  Order Order[]
 }
 
-model Password {
+model Session {
   id String @id @default(ulid())
 
-  hash String
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
 
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id String @id @default(ulid())
+
+  accountId  String
+  providerId String // email/password, google, facebook
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+
+  password String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Verification {
+  id String @id @default(ulid())
+
+  identifier String
+  value      String
+  expiresAt  DateTime
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
 }
 
 // ============================
 // ADDRESS MANAGEMENT
 // ============================
+
 model Address {
   id String @id @default(ulid())
 
@@ -85,9 +118,10 @@ model Address {
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
 
+  orders Order[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Order     Order[]
 
   @@unique([userId, label])
 }
@@ -95,6 +129,7 @@ model Address {
 // ============================
 // PRODUCT MANAGEMENT
 // ============================
+
 model Product {
   id String @id @default(ulid())
 
@@ -147,6 +182,7 @@ model ProductImage {
 // ============================
 // CART MANAGEMENT  
 // ============================
+
 model Cart {
   id String @id @default(ulid())
 
@@ -182,6 +218,7 @@ model CartItem {
 // ============================
 // SHIPPING MANAGEMENT  
 // ============================
+
 model ShippingMethod {
   id String @id @default(ulid())
 
@@ -199,6 +236,7 @@ model ShippingMethod {
 // ============================
 // PAYMENT MANAGEMENT  
 // ============================
+
 model PaymentMethod {
   id String @id @default(ulid())
 
@@ -215,6 +253,7 @@ model PaymentMethod {
 // ============================
 // ORDER MANAGEMENT
 // ============================
+
 model Order {
   id String @id @default(ulid())
 
