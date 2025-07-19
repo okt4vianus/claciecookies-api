@@ -30,6 +30,19 @@ export const auth = betterAuth({
   },
 
   // rename: User, Session, Account, Verification
+  // https://better-auth.com/docs/reference/options
+  user: {
+    modelName: "User",
+  },
+  account: {
+    modelName: "Account",
+  },
+  session: {
+    modelName: "Session",
+  },
+  verification: {
+    modelName: "Verification",
+  },
 
   plugins: [
     openAPI(),
