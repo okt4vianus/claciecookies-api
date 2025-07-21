@@ -30,6 +30,26 @@ export const auth = betterAuth({
   },
 
   // rename: User, Session, Account, Verification
+  // https://www.better-auth.com/docs/reference/options#verification
+  user: {
+    modelName: "User",
+  },
+  account: {
+    modelName: "Account",
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["email-password", "google", "facebook"],
+      allowDifferentEmails: true,
+      allowUnlinkingAll: true,
+    },
+    updateAccountOnSignIn: true,
+  },
+  session: {
+    modelName: "Session",
+  },
+  verification: {
+    modelName: "Verification",
+  },
 
   plugins: [
     openAPI(),
