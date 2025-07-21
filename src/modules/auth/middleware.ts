@@ -1,14 +1,11 @@
 import { createMiddleware } from "hono/factory";
 import { User } from "~/generated/prisma";
 import { prisma } from "~/lib/prisma";
-import { type AuthTokenPayload } from "~/lib/token";
 import { verifyToken } from "~/lib/token";
-// import { PrivateCart } from "~/modules/cart/schema";
 
 export type Env = {
   Variables: {
     user: User;
-    // cart: PrivateCart;
   };
 };
 
