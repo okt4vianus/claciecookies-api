@@ -8,7 +8,8 @@ export type AuthTokenPayload = JWTPayload & {
 
 export async function signToken(userId: string): Promise<string | null> {
   try {
-    const secret = String(process.env.TOKEN_SECRET);
+    // const secret = String(process.env.TOKEN_SECRET);
+    const secret = String(process.env.BETTER_AUTH_SECRET);
     const payload: JWTPayload = {
       sub: userId,
       iat: Math.floor(Date.now() / 1000), // Issued at time

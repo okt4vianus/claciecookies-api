@@ -12,6 +12,9 @@ import { shippingMethodRoute } from "~/modules/shipping-method/route";
 import { paymentMethodRoute } from "./modules/payment-method/route";
 import { ordersRoute } from "./modules/order/route";
 
+import { auth } from "./auth"; // path to your auth file
+// import { cors } from "hono/cors";
+
 const app = new OpenAPIHono();
 
 app.use(logger());
@@ -19,12 +22,15 @@ app.use(logger());
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
 app.route("/address", addressRoute);
-app.route("/auth", authRoute); // model: User
 app.route("/search", searchRoute); // model: Products
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
 app.route("/orders", ordersRoute);
+
+// app.route("/auth", authRoute); // our own auth solution with model: User
+
+app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 
 app
   .doc("/openapi.json", {
