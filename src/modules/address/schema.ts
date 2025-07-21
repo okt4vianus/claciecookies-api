@@ -4,7 +4,7 @@ import { phoneNumber } from "~/modules/common/schema";
 
 export const AddressSchema = BaseAddressSchema;
 
-export const AddressesSchema = z.array(BaseAddressSchema);
+export const AddressesSchema = z.array(AddressSchema);
 
 export const CreateAddressSchema = AddressSchema.omit({
   id: true,

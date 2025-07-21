@@ -31,6 +31,7 @@ export const checkAuthorized = createMiddleware<Env>(async (c, next) => {
     return c.json({ message: "Token not found" }, 401);
   }
 
+  // TODO: Verify via Better-Auth
   const payload = await verifyToken(token);
   if (!payload) {
     return c.json({ message: "Invalid token" }, 401);

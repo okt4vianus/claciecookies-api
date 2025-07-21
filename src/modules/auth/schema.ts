@@ -1,8 +1,5 @@
 import { z } from "zod";
-import type { User } from "better-auth";
-import { UserSchema } from "~/generated/zod";
-
-export const UsersSchema = z.array(UserSchema);
+import { UserSchema } from "~/modules/user/schema";
 
 export const AuthBodySchema = UserSchema.omit({
   id: true,
@@ -24,16 +21,7 @@ export const RegisterBodySchema = AuthBodySchema.pick({
 
 export const RegisterResponseSchema = z.object({
   token: z.string().nullable(),
-  user: UserSchema.pick({
-    id: true,
-    email: true,
-    emailVerified: true,
-    name: true,
-    createdAt: true,
-    updatedAt: true,
-  }).extend({
-    image: z.string().nullable().optional(),
-  }),
+  user: UserSchema,
 });
 
 export const LoginBodySchema = AuthBodySchema.pick({
@@ -42,6 +30,8 @@ export const LoginBodySchema = AuthBodySchema.pick({
 });
 
 export const LoginResponseSchema = z.object({
+  redirect: z.boolean(),
+  url: z.string().optional(),
   token: z.string(),
   user: UserSchema,
 });
