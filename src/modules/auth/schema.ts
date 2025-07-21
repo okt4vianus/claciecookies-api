@@ -1,6 +1,5 @@
-// import { z } from "@hono/zod-openapi";
-import { use } from "hono/jsx";
 import { z } from "zod";
+import type { User } from "better-auth";
 import { UserSchema } from "~/generated/zod";
 
 export const UsersSchema = z.array(UserSchema);
@@ -17,10 +16,24 @@ export const AuthBodySchema = UserSchema.omit({
 });
 
 export const RegisterBodySchema = AuthBodySchema.pick({
-  username: true,
+  name: true,
   email: true,
-  fullName: true,
+  username: true,
   password: true,
+});
+
+export const RegisterResponseSchema = z.object({
+  token: z.string().nullable(),
+  user: UserSchema.pick({
+    id: true,
+    email: true,
+    emailVerified: true,
+    name: true,
+    createdAt: true,
+    updatedAt: true,
+  }).extend({
+    image: z.string().nullable().optional(),
+  }),
 });
 
 export const LoginBodySchema = AuthBodySchema.pick({

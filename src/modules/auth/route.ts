@@ -4,10 +4,16 @@ import { hashPassword, verifyPassword } from "~/lib/password";
 import { prisma } from "~/lib/prisma";
 import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import { LoginBodySchema, LoginResponseSchema, RegisterBodySchema } from "~/modules/auth/schema";
+import {
+  LoginBodySchema,
+  LoginResponseSchema,
+  RegisterBodySchema,
+  RegisterResponseSchema,
+} from "~/modules/auth/schema";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import { PrivateUserProfileSchema } from "../user/schema";
-import { AddressesSchema } from "../address/schema";
+import { PrivateUserProfileSchema } from "~/modules/user/schema";
+import { AddressesSchema } from "~/modules/address/schema";
+import { auth } from "~/auth";
 
 export const authRoute = new OpenAPIHono();
 
@@ -20,14 +26,10 @@ authRoute.openapi(
     summary: "Register a new user",
     method: "post",
     path: "/register",
-    request: {
-      body: {
-        content: { "application/json": { schema: RegisterBodySchema } },
-      },
-    },
+    request: { body: { content: { "application/json": { schema: RegisterBodySchema } } } },
     responses: {
       201: {
-        content: { "application/json": { schema: PrivateUserAddressSchema } },
+        content: { "application/json": { schema: RegisterResponseSchema } },
         description: "User registered successfully",
       },
       500: {
@@ -41,18 +43,16 @@ authRoute.openapi(
       const body = c.req.valid("json");
       const { password, ...userData } = body;
 
-      const hashedPassword = await hashPassword(password);
-
-      const newUser = await prisma.user.create({
-        data: {
-          ...userData,
-          password: {
-            create: { hash: hashedPassword },
-          },
+      const { token, user } = await auth.api.signUpEmail({
+        body: {
+          name: userData.name,
+          email: userData.email,
+          username: userData.username,
+          password,
         },
       });
 
-      return c.json(newUser, 201);
+      return c.json({ token, user }, 201);
     } catch (error) {
       return c.json({ message: "Failed to registering user", details: error }, 500);
     }

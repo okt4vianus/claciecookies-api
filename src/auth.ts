@@ -38,7 +38,7 @@ export const auth = betterAuth({
     modelName: "Account",
     accountLinking: {
       enabled: true,
-      trustedProviders: ["email-password", "google", "facebook"],
+      trustedProviders: ["credential", "email-password", "google", "facebook"],
       allowDifferentEmails: true,
       allowUnlinkingAll: true,
     },

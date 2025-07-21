@@ -43,7 +43,7 @@ addressRoute.openapi(
             isDefault: true,
             userId: user.id,
             label: "Rumah",
-            recipientName: user.fullName,
+            recipientName: user.name,
             phoneNumber: user.phoneNumber || "+62",
             street: "",
             city: "",

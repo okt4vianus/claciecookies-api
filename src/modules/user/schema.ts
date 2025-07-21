@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { AddressIncludeSchema, UserSchema } from "~/generated/zod";
-import { phoneNumber } from "../common/schema";
+import { UserSchema } from "~/generated/zod";
 
 export const PublicUserSchema = UserSchema.omit({ email: true });
 export const PublicUsersSchema = z.array(PublicUserSchema);

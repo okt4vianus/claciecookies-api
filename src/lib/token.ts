@@ -1,10 +1,15 @@
 import { sign, verify } from "hono/jwt";
 import { JWTPayload } from "hono/utils/jwt/types";
 
+/**
+ * Legacy code. Because we're using built-in token via Better-Auth
+ *
+ * https://better-auth.com/docs/plugins/bearer
+ */
+
 export type AuthTokenPayload = JWTPayload & {
   sub: string;
 };
-// TOKEN_SECRET_KEY;
 
 export async function signToken(userId: string): Promise<string | null> {
   try {
@@ -23,9 +28,7 @@ export async function signToken(userId: string): Promise<string | null> {
   }
 }
 
-export async function verifyToken(
-  token: string
-): Promise<AuthTokenPayload | null> {
+export async function verifyToken(token: string): Promise<AuthTokenPayload | null> {
   const secret = String(process.env.TOKEN_SECRET);
   try {
     const payload = (await verify(token, secret)) as AuthTokenPayload;
