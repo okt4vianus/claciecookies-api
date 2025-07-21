@@ -2,7 +2,12 @@ import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
 import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import { AddressesSchema, AddressSchema, CreateAddressSchema, UpdateAddressSchema } from "~/modules/address/schema";
+import {
+  AddressesSchema,
+  AddressSchema,
+  CreateAddressSchema,
+  UpdateAddressSchema,
+} from "~/modules/address/schema";
 
 export const addressRoute = new OpenAPIHono();
 
@@ -43,7 +48,7 @@ addressRoute.openapi(
             isDefault: true,
             userId: user.id,
             label: "Rumah",
-            recipientName: user.fullName,
+            recipientName: user.name,
             phoneNumber: user.phoneNumber || "+62",
             street: "",
             city: "",
@@ -133,7 +138,10 @@ addressRoute.openapi(
 
       return c.json(newAddress, 201);
     } catch (error) {
-      return c.json({ message: "Failed to create address", details: error }, 500);
+      return c.json(
+        { message: "Failed to create address", details: error },
+        500
+      );
     }
   }
 );
