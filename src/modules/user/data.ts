@@ -1,46 +1,34 @@
 import { Address, User } from "~/generated/prisma";
 
 // export type CreateUser = User;
-// export type CreateUser = Pick<User, "fullName" | "username" | "email"> & {
+// export type CreateUser = Pick<User, "name" | "username" | "email"> & {
 //   password: string;
 // };
 
-export type CreateUser = Pick<
-  User,
-  "fullName" | "username" | "email" | "phoneNumber"
-> & {
+export type SeedUser = Pick<User, "name" | "username" | "email" | "phoneNumber"> & {
   password: string;
 };
 
 export type UpdateUser = Partial<User>;
 
-// Single user
-export const dataUser: CreateUser = {
-  fullName: "John Doe",
-  username: "johndoe",
-  email: "john.doe@claciecookies.com",
-  password: "placeholder",
-  phoneNumber: "081234567890",
-};
-
 // Multiple users for seeding
-export const dataUsers: CreateUser[] = [
+export const dataSeedUsers: SeedUser[] = [
   {
-    fullName: "Admin",
+    name: "Admin",
     username: "admin",
     email: "admin@claciecookies.com",
     password: "placeholder",
     phoneNumber: null,
   },
   {
-    fullName: "Clacie",
+    name: "Clacie",
     username: "clacie",
     email: "clacie@claciecookies.com",
     password: "placeholder",
     phoneNumber: "081111111111",
   },
   {
-    fullName: "Oktav",
+    name: "Oktav",
     username: "oktav",
     email: "oktav@claciecookies.com",
     password: "placeholder",
@@ -48,10 +36,7 @@ export const dataUsers: CreateUser[] = [
   },
 ];
 
-export type CreateAddress = Omit<
-  Address,
-  "id" | "userId" | "createdAt" | "updatedAt"
-> & {
+export type CreateAddress = Omit<Address, "id" | "userId" | "createdAt" | "updatedAt"> & {
   userEmail: string; // Will use email to find the user
 };
 

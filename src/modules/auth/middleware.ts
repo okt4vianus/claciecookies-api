@@ -1,14 +1,11 @@
 import { createMiddleware } from "hono/factory";
 import { User } from "~/generated/prisma";
 import { prisma } from "~/lib/prisma";
-import { type AuthTokenPayload } from "~/lib/token";
 import { verifyToken } from "~/lib/token";
-// import { PrivateCart } from "~/modules/cart/schema";
 
 export type Env = {
   Variables: {
     user: User;
-    // cart: PrivateCart;
   };
 };
 
@@ -31,6 +28,7 @@ export const checkAuthorized = createMiddleware<Env>(async (c, next) => {
     return c.json({ message: "Token not found" }, 401);
   }
 
+  // TODO: Verify via Better-Auth
   const payload = await verifyToken(token);
   if (!payload) {
     return c.json({ message: "Invalid token" }, 401);
