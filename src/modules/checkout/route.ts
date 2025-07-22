@@ -21,51 +21,34 @@ checkoutRoute.openapi(
     responses: {
       200: {
         description: "Successfully fetched all checkout data",
-        content: {
-          "application/json": {
-            schema: CheckoutResponseSchema,
-          },
-        },
+        content: { "application/json": { schema: CheckoutResponseSchema } },
       },
-
       401: {
         description: "Unauthorized",
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
+        content: { "application/json": { schema: ErrorResponseSchema } },
       },
-      500: {
-        description: "Server error",
-        content: {
-          "application/json": {
-            schema: ErrorResponseSchema,
-          },
-        },
-      },
+      500: { description: "Server error" },
     },
   }),
   async (c) => {
     const user = c.get("user");
 
     try {
-      // Get user profile
-      const profile = await prisma.user.findUnique({
+      const foundUser = await prisma.user.findUnique({
         where: { id: user.id },
         select: {
-          fullName: true,
+          name: true,
           email: true,
           phoneNumber: true,
         },
       });
 
-      if (!profile) {
+      if (!foundUser) {
         return c.json({ message: "User not found" }, 401);
       }
 
       // Get or create cart
-      let cart = await prisma.cart.findFirst({
+      const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
         include: {
           items: { include: { product: { include: { images: true } } } },
@@ -73,15 +56,9 @@ checkoutRoute.openapi(
       });
 
       if (!cart) {
-        cart = await prisma.cart.create({
-          data: { userId: user.id },
-          include: {
-            items: { include: { product: { include: { images: true } } } },
-          },
-        });
+        return c.json({ message: "Cart not found" }, 401);
       }
 
-      // Get or create default address
       let address = await prisma.address.findFirst({
         where: { userId: user.id, isDefault: true },
       });
@@ -92,8 +69,8 @@ checkoutRoute.openapi(
             isDefault: true,
             userId: user.id,
             label: "Rumah",
-            recipientName: profile.fullName,
-            phoneNumber: profile.phoneNumber || "+62",
+            recipientName: foundUser.name,
+            phoneNumber: foundUser.phoneNumber || "+62",
             street: "",
             city: "",
             postalCode: "",
@@ -112,7 +89,7 @@ checkoutRoute.openapi(
       ]);
 
       return c.json({
-        profile,
+        profile: foundUser,
         cart,
         address,
         shippingMethods,

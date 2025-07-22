@@ -1,9 +1,9 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { logger } from "hono/logger";
+import { cors } from "hono/cors";
 
 import { addressRoute } from "~/modules/address/route";
-import { authRoute } from "~/modules/auth/route";
 import { cartRoute } from "~/modules/cart/route";
 import { productsRoute } from "~/modules/product/route";
 import { searchRoute } from "~/modules/search/route";
@@ -11,12 +11,11 @@ import { usersRoute } from "~/modules/user/route";
 import { shippingMethodRoute } from "~/modules/shipping-method/route";
 import { paymentMethodRoute } from "./modules/payment-method/route";
 import { ordersRoute } from "./modules/order/route";
-
-import { auth } from "./auth"; // path to your auth file
-// import { cors } from "hono/cors";
+import { auth } from "./auth";
 
 const app = new OpenAPIHono();
 
+app.use(cors());
 app.use(logger());
 
 app.route("/products", productsRoute);

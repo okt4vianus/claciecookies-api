@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { AddressSchema as BaseAddressSchema } from "~/generated/zod";
-import { phoneNumber } from "../common/schema";
+import { phoneNumber } from "~/modules/common/schema";
 
 export const AddressSchema = BaseAddressSchema;
 
-export const AddressesSchema = z.array(BaseAddressSchema);
+export const AddressesSchema = z.array(AddressSchema);
 
 export const CreateAddressSchema = AddressSchema.omit({
   id: true,

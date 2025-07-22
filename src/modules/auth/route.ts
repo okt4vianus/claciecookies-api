@@ -1,13 +1,16 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { UserSchema as PrivateUserAddressSchema } from "~/generated/zod";
-import { hashPassword, verifyPassword } from "~/lib/password";
 import { prisma } from "~/lib/prisma";
-import { signToken } from "~/lib/token";
 import { checkAuthorized } from "~/modules/auth/middleware";
-import { LoginBodySchema, LoginResponseSchema, RegisterBodySchema } from "~/modules/auth/schema";
+import {
+  LoginBodySchema,
+  LoginResponseSchema,
+  RegisterBodySchema,
+  RegisterResponseSchema,
+} from "~/modules/auth/schema";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import { PrivateUserProfileSchema } from "../user/schema";
-import { AddressesSchema } from "../address/schema";
+import { PrivateUserProfileSchema, UserSchema } from "~/modules/user/schema";
+import { AddressesSchema } from "~/modules/address/schema";
+import { auth } from "~/auth";
 
 export const authRoute = new OpenAPIHono();
 
@@ -21,13 +24,11 @@ authRoute.openapi(
     method: "post",
     path: "/register",
     request: {
-      body: {
-        content: { "application/json": { schema: RegisterBodySchema } },
-      },
+      body: { content: { "application/json": { schema: RegisterBodySchema } } },
     },
     responses: {
       201: {
-        content: { "application/json": { schema: PrivateUserAddressSchema } },
+        content: { "application/json": { schema: RegisterResponseSchema } },
         description: "User registered successfully",
       },
       500: {
@@ -39,22 +40,13 @@ authRoute.openapi(
   async (c) => {
     try {
       const body = c.req.valid("json");
-      const { password, ...userData } = body;
-
-      const hashedPassword = await hashPassword(password);
-
-      const newUser = await prisma.user.create({
-        data: {
-          ...userData,
-          password: {
-            create: { hash: hashedPassword },
-          },
-        },
-      });
-
-      return c.json(newUser, 201);
+      const { token, user } = await auth.api.signUpEmail({ body });
+      return c.json({ token, user }, 201);
     } catch (error) {
-      return c.json({ message: "Failed to registering user", details: error }, 500);
+      return c.json(
+        { message: "Failed to registering user", details: error },
+        500
+      );
     }
   }
 );
@@ -67,9 +59,7 @@ authRoute.openapi(
     method: "post",
     path: "/login",
     request: {
-      body: {
-        content: { "application/json": { schema: LoginBodySchema } },
-      },
+      body: { content: { "application/json": { schema: LoginBodySchema } } },
     },
     responses: {
       200: {
@@ -85,53 +75,23 @@ authRoute.openapi(
   async (c) => {
     try {
       const body = c.req.valid("json");
-      const { password, ...userData } = body;
 
-      const user = await prisma.user.findUnique({
-        where: { email: userData.email },
-        include: { password: true },
+      const existingUser = await prisma.user.findUnique({
+        where: { email: body.email },
+      });
+      if (!existingUser) {
+        return c.json(
+          { field: "email", message: "User not found", error: null },
+          400
+        );
+      }
+
+      const { redirect, url, token, user } = await auth.api.signInEmail({
+        body,
       });
 
-      if (!user) {
-        return c.json({ field: "email", message: "User not found", error: null }, 400);
-      }
-
-      if (!user.password) {
-        return c.json(
-          {
-            field: "password",
-            message: "User does not have a password. Might have login with Google.",
-            error: null,
-          },
-          400
-        );
-      }
-
-      const isPasswordValid = await verifyPassword(password, user.password.hash);
-
-      if (!isPasswordValid) {
-        return c.json(
-          {
-            field: "password",
-            message: "Invalid password",
-            error: null,
-          },
-          400
-        );
-      }
-
-      // Remove password from the response
-      // Only return the user fields as defined in UserSchema
-      const { password: _, ...userWithoutPassword } = user;
-
-      const token = await signToken(userWithoutPassword.id);
-      if (!token) {
-        return c.json({ message: "Failed to generate token", error: null }, 400);
-      }
-
       c.header("Token", token);
-
-      return c.json({ token, user: userWithoutPassword, error: null }, 200);
+      return c.json({ redirect, url, token, user }, 200);
     } catch (error) {
       return c.json({ message: "User login failed", details: error }, 400);
     }
@@ -145,52 +105,12 @@ authRoute.openapi(
     summary: "Get authenticated user profile",
     method: "get",
     path: "/me",
-    security: [{ BearerAuth: [] }], // OpenAPI security scheme
-    middleware: checkAuthorized, // Actual logic process- Custom middleware to check authorization
-    responses: {
-      200: {
-        description: "Successfully retrieved authenticated user",
-        content: { "application/json": { schema: PrivateUserAddressSchema } },
-      },
-      404: {
-        description: "User not found",
-        content: { "application/json": { schema: ErrorResponseSchema } },
-      },
-      500: {
-        description: "Internal server error",
-        content: { "application/json": { schema: ErrorResponseSchema } },
-      },
-    },
-  }),
-  async (c) => {
-    try {
-      const user = c.get("user");
-
-      if (!user) {
-        return c.json({ message: "User not found" }, 404);
-      }
-
-      return c.json(user, 200);
-    } catch (error) {
-      console.error("Error retrieving authenticated user:", error);
-      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
-    }
-  }
-);
-
-// GET /auth/profile
-authRoute.openapi(
-  createRoute({
-    tags,
-    summary: "Get complete authenticated user profile",
-    method: "get",
-    path: "/profile",
     security: [{ BearerAuth: [] }],
     middleware: checkAuthorized,
     responses: {
       200: {
         description: "Successfully retrieved authenticated user",
-        content: { "application/json": { schema: PrivateUserProfileSchema } },
+        content: { "application/json": { schema: UserSchema } },
       },
       404: {
         description: "User not found",
@@ -205,47 +125,14 @@ authRoute.openapi(
   async (c) => {
     try {
       const user = c.get("user");
-
-      if (!user) {
-        return c.json({ message: "User not found" }, 404);
-      }
-
-      // const userProfile = await prisma.user.findUnique({
-      //   where: { id: user.id },
-      //   select: { fullName: true, email: true, phoneNumber: true },
-      // });
-
-      const userProfile = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          fullName: true,
-          email: true,
-          phoneNumber: true,
-          addresses: {
-            where: { isDefault: true },
-            take: 1,
-            select: {
-              id: true,
-              street: true,
-              city: true,
-            },
-          },
-        },
-      });
-
-      if (!userProfile) {
-        return c.json({ message: "User not found" }, 404);
-      }
-
-      // const userAddress = await prisma.user.findUnique({
-      //   where: { id: user.id },
-      //   // include: {address: true}
-      // });
-
-      return c.json(userProfile, 200);
+      if (!user) return c.json({ message: "User not found" }, 404);
+      return c.json(user, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
+      return c.json(
+        { message: "Failed to retrieve authenticated user", details: error },
+        500
+      );
     }
   }
 );
@@ -324,7 +211,10 @@ authRoute.openapi(
 
       return c.json(addresses, 200);
     } catch (error) {
-      return c.json({ message: "Failed to retrieve addresses", details: error }, 500);
+      return c.json(
+        { message: "Failed to retrieve addresses", details: error },
+        500
+      );
     }
   }
 );

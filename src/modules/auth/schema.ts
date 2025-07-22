@@ -1,9 +1,5 @@
-// import { z } from "@hono/zod-openapi";
-import { use } from "hono/jsx";
 import { z } from "zod";
-import { UserSchema } from "~/generated/zod";
-
-export const UsersSchema = z.array(UserSchema);
+import { UserSchema } from "~/modules/user/schema";
 
 export const AuthBodySchema = UserSchema.omit({
   id: true,
@@ -17,10 +13,15 @@ export const AuthBodySchema = UserSchema.omit({
 });
 
 export const RegisterBodySchema = AuthBodySchema.pick({
-  username: true,
+  name: true,
   email: true,
-  fullName: true,
+  username: true,
   password: true,
+});
+
+export const RegisterResponseSchema = z.object({
+  token: z.string().nullable(),
+  user: UserSchema,
 });
 
 export const LoginBodySchema = AuthBodySchema.pick({
@@ -29,6 +30,8 @@ export const LoginBodySchema = AuthBodySchema.pick({
 });
 
 export const LoginResponseSchema = z.object({
+  redirect: z.boolean(),
+  url: z.string().optional(),
   token: z.string(),
   user: UserSchema,
 });
