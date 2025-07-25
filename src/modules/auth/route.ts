@@ -1,5 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
+import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
 import { PrivateUserProfileSchema, UserSchema } from "~/modules/user/schema";
 import { AddressesSchema } from "~/modules/address/schema";
@@ -9,6 +10,44 @@ export const authRoute = new OpenAPIHono<Env>();
 
 const tags = ["Auth"];
 
+// GET /auth/me
+authRoute.openapi(
+  createRoute({
+    tags,
+    summary: "Get authenticated user profile",
+    method: "get",
+    path: "/me",
+    security: [{ BearerAuth: [] }],
+    responses: {
+      401: { description: "Unauthorized" },
+      200: {
+        description: "Successfully retrieved authenticated user",
+        content: { "application/json": { schema: UserSchema } },
+      },
+      404: {
+        description: "User not found",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+      500: {
+        description: "Internal server error",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+    },
+  }),
+  async (c) => {
+    try {
+      const user = c.get("user");
+      if (!user) return c.text("Unauthorized", 401);
+
+      if (!user) return c.json({ message: "User not found" }, 404);
+      return c.json(user, 200);
+    } catch (error) {
+      console.error("Error retrieving authenticated user:", error);
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
+    }
+  }
+);
+
 // PATCH /auth/profile
 authRoute.openapi(
   createRoute({
@@ -17,8 +56,11 @@ authRoute.openapi(
     method: "patch",
     path: "/profile",
     security: [{ BearerAuth: [] }],
+    middleware: checkAuthorized,
     request: {
-      body: { content: { "application/json": { schema: PrivateUserProfileSchema } } },
+      body: {
+        content: { "application/json": { schema: PrivateUserProfileSchema } },
+      },
     },
     responses: {
       401: { description: "Unauthorized" },
@@ -70,6 +112,10 @@ authRoute.openapi(
     if (!user) return c.text("Unauthorized", 401);
 
     try {
+      if (!user) {
+        return c.json({ message: "User not found" }, 404);
+      }
+
       const addresses = await prisma.address.findMany({
         where: { userId: user.id },
         orderBy: [{ createdAt: "asc" }],
