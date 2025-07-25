@@ -12,6 +12,7 @@ import { shippingMethodRoute } from "~/modules/shipping-method/route";
 import { paymentMethodRoute } from "~/modules/payment-method/route";
 import { ordersRoute } from "~/modules/order/route";
 import { auth } from "~/auth";
+import { authRoute } from "~/modules/auth/route";
 
 export type Env = {
   Variables: {
@@ -39,6 +40,7 @@ app.use("*", async (c, next) => {
   return next();
 });
 
+app.route("/auth", authRoute); // TODO: Temporary, will be removed later
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
 app.route("/address", addressRoute);
