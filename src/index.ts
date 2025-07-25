@@ -9,9 +9,9 @@ import { productsRoute } from "~/modules/product/route";
 import { searchRoute } from "~/modules/search/route";
 import { usersRoute } from "~/modules/user/route";
 import { shippingMethodRoute } from "~/modules/shipping-method/route";
-import { paymentMethodRoute } from "./modules/payment-method/route";
-import { ordersRoute } from "./modules/order/route";
-import { auth } from "./auth";
+import { paymentMethodRoute } from "~/modules/payment-method/route";
+import { ordersRoute } from "~/modules/order/route";
+import { auth } from "~/auth";
 
 export type Env = {
   Variables: {
