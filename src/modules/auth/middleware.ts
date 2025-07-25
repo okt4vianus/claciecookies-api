@@ -1,19 +1,17 @@
 import { createMiddleware } from "hono/factory";
 import { User } from "~/generated/prisma";
+import { Env } from "~/index";
 import { prisma } from "~/lib/prisma";
 import { verifyToken } from "~/lib/token";
 
-export type Env = {
-  Variables: {
-    user: User;
-  };
-};
-
 /**
+ * UNUSED because of Better-Auth
+ *
  * Check for header and token
  *
  * Authorization: Bearer <token>
  */
+
 export const checkAuthorized = createMiddleware<Env>(async (c, next) => {
   const authHeader = c.req.header("Authorization");
   if (!authHeader) {
@@ -45,30 +43,3 @@ export const checkAuthorized = createMiddleware<Env>(async (c, next) => {
 
   await next();
 });
-
-// TODO: Check for cart
-// export const checkCart = createMiddleware<Env>(async (c, next) => {
-//   const user = c.get("user");
-
-//   const existingCart = await prisma.cart.findUnique({
-//     where: { userId: user.id },
-//     include: {
-//       items: { include: { product: { include: { images: true } } } },
-//     },
-//   });
-
-//   if (!existingCart) {
-//     const newCart = await prisma.cart.create({
-//       data: { userId: user.id },
-//       include: {
-//         items: { include: { product: { include: { images: true } } } },
-//       },
-//     });
-
-//     c.set("cart", newCart);
-//     await next();
-//   } else {
-//     c.set("cart", existingCart);
-//     await next();
-//   }
-// });

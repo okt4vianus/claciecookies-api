@@ -1,10 +1,10 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import { checkAuthorized } from "~/modules/auth/middleware";
 import { CreateNewOrderSchema, OrderSchema, ParamOrderIdSchema } from "~/modules/order/schema";
-import { ErrorResponseSchema, SuccessResponseSchema } from "~/modules/common/schema";
+import { ErrorResponseSchema } from "~/modules/common/schema";
+import { Env } from "~/index";
 
-export const ordersRoute = new OpenAPIHono();
+export const ordersRoute = new OpenAPIHono<Env>();
 
 const tags = ["Orders"];
 
@@ -16,13 +16,11 @@ ordersRoute.openapi(
     method: "post",
     path: "/",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
-      body: {
-        content: { "application/json": { schema: CreateNewOrderSchema } },
-      },
+      body: { content: { "application/json": { schema: CreateNewOrderSchema } } },
     },
     responses: {
+      401: { description: "Unauthorized" },
       201: {
         content: { "application/json": { schema: OrderSchema } },
         description: "Successfully created order",
@@ -42,10 +40,12 @@ ordersRoute.openapi(
     },
   }),
   async (c) => {
-    try {
-      const user = c.get("user");
-      const body = c.req.valid("json");
+    const user = c.get("user");
+    if (!user) return c.text("Unauthorized", 401);
 
+    const body = c.req.valid("json");
+
+    try {
       const [cart, address, shippingMethod, paymentMethod] = await Promise.all([
         prisma.cart.findUnique({
           where: { userId: user.id },
@@ -157,11 +157,9 @@ ordersRoute.openapi(
     summary: "Get order by ID",
     tags,
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
-    request: {
-      params: ParamOrderIdSchema,
-    },
+    request: { params: ParamOrderIdSchema },
     responses: {
+      401: { description: "Unauthorized" },
       200: {
         description: "Get Order detail by id",
         content: { "application/json": { schema: OrderSchema } },
@@ -171,6 +169,8 @@ ordersRoute.openapi(
   }),
   async (c) => {
     const user = c.get("user");
+    if (!user) return c.text("Unauthorized", 401);
+
     const { id } = c.req.valid("param");
 
     try {

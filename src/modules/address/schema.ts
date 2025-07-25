@@ -8,6 +8,7 @@ export const AddressesSchema = z.array(AddressSchema);
 
 export const CreateAddressSchema = AddressSchema.omit({
   id: true,
+  userId: true,
   createdAt: true,
   updatedAt: true,
 }).extend({
@@ -38,9 +39,7 @@ export const UpdateAddressSchema = z.object({
 
   notes: z.string().max(500).optional().or(z.literal("")),
 
-  isDefault: z
-    .union([z.boolean(), z.string().transform((v) => v === "true")])
-    .optional(),
+  isDefault: z.union([z.boolean(), z.string().transform((v) => v === "true")]).optional(),
 
   // opsional for peta/gps
   latitude: z.coerce.number().optional(),

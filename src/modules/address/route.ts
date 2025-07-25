@@ -1,15 +1,10 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
-import {
-  AddressesSchema,
-  AddressSchema,
-  CreateAddressSchema,
-  UpdateAddressSchema,
-} from "~/modules/address/schema";
+import { AddressSchema, CreateAddressSchema, UpdateAddressSchema } from "~/modules/address/schema";
+import { Env } from "~/index";
 
-export const addressRoute = new OpenAPIHono();
+export const addressRoute = new OpenAPIHono<Env>();
 
 const tags = ["Address"];
 
@@ -21,8 +16,8 @@ addressRoute.openapi(
     method: "get",
     path: "/",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     responses: {
+      401: { description: "Unauthorized" },
       200: {
         description: "Successfully retrieved authenticated user",
         content: { "application/json": { schema: AddressSchema } },
@@ -36,6 +31,7 @@ addressRoute.openapi(
   async (c) => {
     try {
       const user = c.get("user");
+      if (!user) return c.text("Unauthorized", 401);
 
       const address = await prisma.address.findFirst({
         where: { userId: user.id, isDefault: true },
@@ -74,13 +70,11 @@ addressRoute.openapi(
     method: "patch",
     path: "/",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
-      body: {
-        content: { "application/json": { schema: UpdateAddressSchema } },
-      },
+      body: { content: { "application/json": { schema: UpdateAddressSchema } } },
     },
     responses: {
+      401: { description: "Unauthorized" },
       200: {
         description: "Successfully updated address",
         content: { "application/json": { schema: AddressSchema } },
@@ -88,10 +82,13 @@ addressRoute.openapi(
     },
   }),
   async (c) => {
+    const user = c.get("user");
+    if (!user) return c.text("Unauthorized", 401);
+
     const addressData = c.req.valid("json");
 
     const updatedAddress = await prisma.address.update({
-      where: { id: addressData.id },
+      where: { id: addressData.id, userId: user.id },
       data: addressData,
     });
 
@@ -107,13 +104,11 @@ addressRoute.openapi(
     method: "post",
     path: "/",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
-      body: {
-        content: { "application/json": { schema: CreateAddressSchema } },
-      },
+      body: { content: { "application/json": { schema: CreateAddressSchema } } },
     },
     responses: {
+      401: { description: "Unauthorized" },
       201: {
         description: "Successfully created address",
         content: { "application/json": { schema: AddressSchema } },
@@ -129,19 +124,22 @@ addressRoute.openapi(
     },
   }),
   async (c) => {
+    const user = c.get("user");
+    if (!user) return c.text("Unauthorized", 401);
+
     try {
       const addressData = c.req.valid("json");
 
       const newAddress = await prisma.address.create({
-        data: addressData,
+        data: {
+          ...addressData,
+          userId: user.id,
+        },
       });
 
       return c.json(newAddress, 201);
     } catch (error) {
-      return c.json(
-        { message: "Failed to create address", details: error },
-        500
-      );
+      return c.json({ message: "Failed to create address", details: error }, 500);
     }
   }
 );

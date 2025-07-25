@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import { PaymentMethodsSchema } from "./schema";
+import { PaymentMethodsSchema } from "~/modules/payment-method/schema";
 
 export const paymentMethodRoute = new OpenAPIHono();
 

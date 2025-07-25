@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { Env } from "~/index";
 import { prisma } from "~/lib/prisma";
-import { checkAuthorized } from "~/modules/auth/middleware";
 import {
   AddProductToCartSchema,
   CartItemSchema,
@@ -10,7 +10,7 @@ import {
 } from "~/modules/cart/schema";
 import { ErrorResponseSchema, ResponseStringSchema } from "~/modules/common/schema";
 
-export const cartRoute = new OpenAPIHono();
+export const cartRoute = new OpenAPIHono<Env>();
 
 const tags = ["Cart"];
 
@@ -22,8 +22,8 @@ cartRoute.openapi(
     method: "get",
     path: "/",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     responses: {
+      401: { description: "Unauthorized" },
       200: {
         content: { "application/json": { schema: CartSchema } },
         description: "Successfully get user's cart",
@@ -32,6 +32,7 @@ cartRoute.openapi(
   }),
   async (c) => {
     const user = c.get("user");
+    if (!user) return c.text("Unauthorized", 401);
 
     const cart = await prisma.cart.findFirst({
       where: { userId: user.id },
@@ -62,13 +63,14 @@ cartRoute.openapi(
     method: "put",
     path: "/items",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
       body: {
         content: { "application/json": { schema: AddProductToCartSchema } },
       },
     },
     responses: {
+      401: { description: "Unauthorized" },
+
       200: {
         content: { "application/json": { schema: CartItemSchema } },
         description: "Successfully update product in cart",
@@ -93,8 +95,10 @@ cartRoute.openapi(
   }),
   async (c) => {
     try {
-      const body = c.req.valid("json");
       const user = c.get("user");
+      if (!user) return c.text("Unauthorized", 401);
+
+      const body = c.req.valid("json");
 
       // Find the user's cart
       const cart = await prisma.cart.findFirst({
@@ -210,17 +214,13 @@ cartRoute.openapi(
     method: "delete",
     path: "/items/{id}",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
       params: ParamItemIdSchema,
     },
     responses: {
+      401: { description: "Unauthorized" },
       200: {
-        content: {
-          "application/json": {
-            schema: ResponseStringSchema,
-          },
-        },
+        content: { "application/json": { schema: ResponseStringSchema } },
         description: "Successfully removed item from cart",
       },
       404: {
@@ -235,8 +235,10 @@ cartRoute.openapi(
   }),
   async (c) => {
     try {
-      const { id: itemId } = c.req.valid("param");
       const user = c.get("user");
+      if (!user) return c.text("Unauthorized", 401);
+
+      const { id: itemId } = c.req.valid("param");
 
       // Find the user's cart
       const cart = await prisma.cart.findFirst({
@@ -306,7 +308,6 @@ cartRoute.openapi(
     method: "patch",
     path: "/items/{id}",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
       params: ParamItemIdSchema,
       body: {
@@ -318,6 +319,7 @@ cartRoute.openapi(
       },
     },
     responses: {
+      401: { description: "Unauthorized" },
       200: {
         content: {
           "application/json": { schema: UpdateCartItemQuantitySchema },
@@ -340,9 +342,11 @@ cartRoute.openapi(
   }),
   async (c) => {
     try {
+      const user = c.get("user");
+      if (!user) return c.text("Unauthorized", 401);
+
       const { id: itemId } = c.req.valid("param");
       const body = c.req.valid("json");
-      const user = c.get("user");
 
       // Find the user's cart
       const cart = await prisma.cart.findFirst({
