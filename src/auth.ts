@@ -10,20 +10,23 @@ export const auth = betterAuth({
     provider: "postgresql",
   }),
 
+  trustedOrigins: [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://byclacie.com",
+    "https://api.byclacie.com",
+  ],
+
   emailAndPassword: {
     enabled: true,
   },
 
   socialProviders: {
-    // TODO: Enable later
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      redirectURI: "http://localhost:5173/auth/callback/google",
     },
-    // facebook: {
-    //   clientId: process.env.FACEBOOK_CLIENT_ID as string,
-    //   clientSecret: process.env.FACEBOOK_CLIENT_SECRET as string,
-    // },
   },
 
   // rename: User, Session, Account, Verification
