@@ -8,6 +8,7 @@ export const AddressesSchema = z.array(AddressSchema);
 
 export const CreateAddressSchema = AddressSchema.omit({
   id: true,
+  userId: true,
   createdAt: true,
   updatedAt: true,
 }).extend({

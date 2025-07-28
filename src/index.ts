@@ -9,15 +9,38 @@ import { productsRoute } from "~/modules/product/route";
 import { searchRoute } from "~/modules/search/route";
 import { usersRoute } from "~/modules/user/route";
 import { shippingMethodRoute } from "~/modules/shipping-method/route";
-import { paymentMethodRoute } from "./modules/payment-method/route";
-import { ordersRoute } from "./modules/order/route";
-import { auth } from "./auth";
+import { paymentMethodRoute } from "~/modules/payment-method/route";
+import { ordersRoute } from "~/modules/order/route";
+import { auth } from "~/auth";
+import { authRoute } from "~/modules/auth/route";
 
-const app = new OpenAPIHono();
+export type Env = {
+  Variables: {
+    user: typeof auth.$Infer.Session.user | null;
+    session: typeof auth.$Infer.Session.session | null;
+  };
+};
+
+const app = new OpenAPIHono<Env>();
 
 app.use(cors());
 app.use(logger());
 
+app.use("*", async (c, next) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+  if (!session) {
+    c.set("user", null);
+    c.set("session", null);
+    return next();
+  }
+
+  c.set("user", session.user);
+  c.set("session", session.session);
+  return next();
+});
+
+app.route("/auth", authRoute); // TODO: Temporary, will be removed later
 app.route("/products", productsRoute);
 app.route("/users", usersRoute);
 app.route("/address", addressRoute);
@@ -26,8 +49,6 @@ app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
 app.route("/orders", ordersRoute);
-
-// app.route("/auth", authRoute); // our own auth solution with model: User
 
 app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 

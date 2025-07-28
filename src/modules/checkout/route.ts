@@ -1,11 +1,10 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-
-import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
 import { CheckoutResponseSchema } from "~/modules/checkout/schema";
+import { Env } from "~/index";
 
-export const checkoutRoute = new OpenAPIHono();
+export const checkoutRoute = new OpenAPIHono<Env>();
 const tags = ["Checkout"];
 
 // GET /checkout
@@ -17,37 +16,20 @@ checkoutRoute.openapi(
     method: "get",
     path: "/checkout",
     security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     responses: {
+      401: { description: "Unauthorized" },
       200: {
         description: "Successfully fetched all checkout data",
         content: { "application/json": { schema: CheckoutResponseSchema } },
-      },
-      401: {
-        description: "Unauthorized",
-        content: { "application/json": { schema: ErrorResponseSchema } },
       },
       500: { description: "Server error" },
     },
   }),
   async (c) => {
     const user = c.get("user");
+    if (!user) return c.text("Unauthorized", 401);
 
     try {
-      const foundUser = await prisma.user.findUnique({
-        where: { id: user.id },
-        select: {
-          name: true,
-          email: true,
-          phoneNumber: true,
-        },
-      });
-
-      if (!foundUser) {
-        return c.json({ message: "User not found" }, 401);
-      }
-
-      // Get or create cart
       const cart = await prisma.cart.findFirst({
         where: { userId: user.id },
         include: {
@@ -55,9 +37,7 @@ checkoutRoute.openapi(
         },
       });
 
-      if (!cart) {
-        return c.json({ message: "Cart not found" }, 401);
-      }
+      if (!cart) return c.json({ message: "Cart not found" }, 401);
 
       let address = await prisma.address.findFirst({
         where: { userId: user.id, isDefault: true },
@@ -69,8 +49,8 @@ checkoutRoute.openapi(
             isDefault: true,
             userId: user.id,
             label: "Rumah",
-            recipientName: foundUser.name,
-            phoneNumber: foundUser.phoneNumber || "+62",
+            recipientName: user.name,
+            phoneNumber: user.phoneNumber || "+62",
             street: "",
             city: "",
             postalCode: "",
@@ -89,7 +69,7 @@ checkoutRoute.openapi(
       ]);
 
       return c.json({
-        profile: foundUser,
+        user,
         cart,
         address,
         shippingMethods,
