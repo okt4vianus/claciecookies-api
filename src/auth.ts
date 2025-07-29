@@ -25,7 +25,6 @@ export const auth = betterAuth({
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      redirectURI: "http://localhost:5173/auth/callback/google",
     },
   },
 
@@ -46,6 +45,14 @@ export const auth = betterAuth({
   },
   session: {
     modelName: "Session",
+
+    cookieOptions: {
+      httpOnly: false, // Allow client-side access to the cookie
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: "/",
+    },
   },
   verification: {
     modelName: "Verification",
