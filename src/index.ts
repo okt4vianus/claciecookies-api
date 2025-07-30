@@ -52,6 +52,7 @@ app.route("/orders", ordersRoute);
 
 app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 
+try {
 app
   .doc("/openapi.json", {
     openapi: "3.0.0",
@@ -67,6 +68,9 @@ app
     in: "header",
     description: "Bearer token for authentication",
   });
+} catch (error) {
+  console.error("Failed to register OpenAPI doc:", error);
+}
 
 // Add API reference page
 app.get(
