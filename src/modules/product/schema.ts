@@ -9,8 +9,6 @@ export const ProductSchema = BaseProductSchema.extend({
   price: z.number().int().positive("Price must be a positive number"),
   stockQuantity: stockQuantitySchema,
   images: z.array(ProductImageSchema).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export const CreateProductSchema = ProductSchema.omit({
