@@ -1,9 +1,9 @@
-import { PrismaClient } from "~/generated/prisma";
-import { seedUsers } from "~prisma/seed/seed-users";
-import { seedAddresses } from "~prisma/seed/seed-addresses";
-import { seedShippingMethods } from "~prisma/seed/seed-shipping-methods";
-import { seedProducts } from "~prisma/seed/seed.products";
-import { seedPaymentMethods } from "~prisma/seed/seed-payment-methods";
+import { PrismaClient } from "@/generated/prisma";
+import { seedUsers } from "@/prisma/seed/seed-users";
+import { seedAddresses } from "@/prisma/seed/seed-addresses";
+import { seedShippingMethods } from "@/prisma/seed/seed-shipping-methods";
+import { seedProducts } from "@/prisma/seed/seed.products";
+import { seedPaymentMethods } from "@/prisma/seed/seed-payment-methods";
 
 const prisma = new PrismaClient();
 

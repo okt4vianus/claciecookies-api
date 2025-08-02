@@ -1,4 +1,4 @@
-import { ProductImage } from "~/modules/product-image/data";
+import { ProductImage } from "@/modules/product-image/data";
 
 export type Product = {
   slug: string; // unique slug for the product

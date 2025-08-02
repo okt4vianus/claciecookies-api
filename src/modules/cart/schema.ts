@@ -2,9 +2,9 @@ import { z } from "zod";
 import {
   CartSchema as BaseChartSchema,
   CartItemSchema as BaseItemChartSchema,
-} from "~/generated/zod";
-import { cardItemQuantitySchema } from "~/modules/common/schema";
-import { ProductSchema } from "~/modules/product/schema";
+} from "@/generated/zod";
+import { cardItemQuantitySchema } from "@/modules/common/schema";
+import { ProductSchema } from "@/modules/product/schema";
 
 export const CartItemSchema = BaseItemChartSchema.extend({
   product: ProductSchema,

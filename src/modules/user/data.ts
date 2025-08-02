@@ -1,4 +1,4 @@
-import { Address, User } from "~/generated/prisma";
+import { Address, User } from "@/generated/prisma";
 
 // export type CreateUser = User;
 // export type CreateUser = Pick<User, "name" | "username" | "email"> & {

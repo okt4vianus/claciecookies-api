@@ -1,4 +1,4 @@
-import { PaymentMethod } from "~/generated/prisma";
+import { PaymentMethod } from "@/generated/prisma";
 
 export type CreatePayment = Pick<
   PaymentMethod,

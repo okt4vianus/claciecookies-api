@@ -1,5 +1,5 @@
-import { prisma } from "~/lib/prisma";
-import { dataProducts } from "~/modules/product/data";
+import { prisma } from "@/lib/prisma";
+import { dataProducts } from "@/modules/product/data";
 
 export async function seedProducts() {
   for (const dataProduct of dataProducts) {

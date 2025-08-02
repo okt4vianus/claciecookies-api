@@ -1,17 +1,17 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { Env } from "~/index";
-import { prisma } from "~/lib/prisma";
+import { Env } from "@/index";
+import { prisma } from "@/lib/prisma";
 import {
   AddProductToCartSchema,
   CartItemSchema,
   CartSchema,
   ParamItemIdSchema,
   UpdateCartItemQuantitySchema,
-} from "~/modules/cart/schema";
+} from "@/modules/cart/schema";
 import {
   ErrorResponseSchema,
   ResponseStringSchema,
-} from "~/modules/common/schema";
+} from "@/modules/common/schema";
 
 export const cartRoute = new OpenAPIHono<Env>();
 
@@ -24,7 +24,6 @@ cartRoute.openapi(
     summary: "Get user's cart",
     method: "get",
     path: "/",
-    security: [{ BearerAuth: [] }],
     responses: {
       401: { description: "Unauthorized" },
       200: {
@@ -65,7 +64,6 @@ cartRoute.openapi(
     summary: "Update product in cart",
     method: "put",
     path: "/items",
-    security: [{ BearerAuth: [] }],
     request: {
       body: {
         content: { "application/json": { schema: AddProductToCartSchema } },
@@ -221,7 +219,6 @@ cartRoute.openapi(
     summary: "Remove item from cart",
     method: "delete",
     path: "/items/{id}",
-    security: [{ BearerAuth: [] }],
     request: {
       params: ParamItemIdSchema,
     },
@@ -315,7 +312,6 @@ cartRoute.openapi(
     summary: "Update product quantity in cart",
     method: "patch",
     path: "/items/{id}",
-    security: [{ BearerAuth: [] }],
     request: {
       params: ParamItemIdSchema,
       body: {

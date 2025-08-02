@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { AddressSchema as BaseAddressSchema } from "~/generated/zod";
-import { phoneNumber } from "~/modules/common/schema";
+import { AddressSchema as BaseAddressSchema } from "@/generated/zod";
+import { phoneNumber } from "@/modules/common/schema";
 
 export const AddressSchema = BaseAddressSchema;
 

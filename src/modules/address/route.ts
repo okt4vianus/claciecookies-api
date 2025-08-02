@@ -1,12 +1,12 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ErrorResponseSchema } from "~/modules/common/schema";
+import { prisma } from "@/lib/prisma";
+import { ErrorResponseSchema } from "@/modules/common/schema";
 import {
   AddressSchema,
   CreateAddressSchema,
   UpdateAddressSchema,
-} from "~/modules/address/schema";
-import { Env } from "~/index";
+} from "@/modules/address/schema";
+import { Env } from "@/index";
 
 export const addressRoute = new OpenAPIHono<Env>();
 
@@ -19,7 +19,6 @@ addressRoute.openapi(
     summary: "Get address of the auth user",
     method: "get",
     path: "/",
-    security: [{ BearerAuth: [] }],
     responses: {
       401: { description: "Unauthorized" },
       200: {
@@ -73,7 +72,6 @@ addressRoute.openapi(
     summary: "Update an existing address",
     method: "patch",
     path: "/",
-    security: [{ BearerAuth: [] }],
     request: {
       body: {
         content: { "application/json": { schema: UpdateAddressSchema } },
@@ -109,7 +107,6 @@ addressRoute.openapi(
     summary: "Create a new address",
     method: "post",
     path: "/",
-    security: [{ BearerAuth: [] }],
     request: {
       body: {
         content: { "application/json": { schema: CreateAddressSchema } },

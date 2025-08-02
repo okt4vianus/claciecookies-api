@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UserSchema as BaseUserSchema } from "~/generated/zod";
+import { UserSchema as BaseUserSchema } from "@/generated/zod";
 
 export const PublicUserSchema = BaseUserSchema.omit({ email: true });
 export const PublicUsersSchema = z.array(PublicUserSchema);

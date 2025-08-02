@@ -1,6 +1,6 @@
-import { auth } from "~/auth";
-import { prisma } from "~/lib/prisma";
-import { dataSeedUsers } from "~/modules/user/data";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { dataSeedUsers } from "@/modules/user/data";
 
 export async function seedUsers() {
   console.info("\n 🟢 Seeding users... \n");

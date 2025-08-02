@@ -1,4 +1,4 @@
-import { ShippingMethod } from "~/generated/prisma";
+import { ShippingMethod } from "@/generated/prisma";
 
 export type CreateShippingMethod = Pick<
   ShippingMethod,

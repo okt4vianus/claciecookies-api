@@ -5,8 +5,8 @@
     "jsxImportSource": "hono/jsx",
     "strictNullChecks": true,
     "paths": {
-      "~/*": ["./src/*"],
-      "~prisma/*": ["./prisma/*"]
+      "@/*": ["./src/*"],
+      "@/prisma/*": ["./prisma/*"]
     }
   }
 }

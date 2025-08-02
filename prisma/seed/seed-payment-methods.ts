@@ -1,5 +1,5 @@
-import { prisma } from "~/lib/prisma";
-import { dataPaymentMethods } from "~/modules/payment-method/data";
+import { prisma } from "@/lib/prisma";
+import { dataPaymentMethods } from "@/modules/payment-method/data";
 
 export async function seedPaymentMethods() {
   console.log("\n💳 Seeding Payment Methods...");
