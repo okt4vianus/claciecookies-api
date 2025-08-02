@@ -1,10 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import {
-  CreateNewOrderSchema,
-  OrderSchema,
-  ParamOrderIdSchema,
-} from "~/modules/order/schema";
+import { CreateNewOrderSchema, OrderSchema, ParamOrderIdSchema } from "~/modules/order/schema";
 import { ErrorResponseSchema } from "~/modules/common/schema";
 import { Env } from "~/index";
 
@@ -19,7 +15,6 @@ ordersRoute.openapi(
     summary: "Create new order from checkout",
     method: "post",
     path: "/",
-    security: [{ BearerAuth: [] }],
     request: {
       body: {
         content: { "application/json": { schema: CreateNewOrderSchema } },
@@ -79,10 +74,7 @@ ordersRoute.openapi(
         return c.json({ message: "Payment method not found" }, 400);
       }
 
-      const orderNumber = `ORD-${Date.now()}-${Math.random()
-        .toString(36)
-        .substring(2, 8)
-        .toUpperCase()}`;
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const shippingCost = shippingMethod.price;
       const totalAmount = cart.totalPrice + shippingCost;
 
@@ -165,7 +157,6 @@ ordersRoute.openapi(
     path: "/{id}",
     summary: "Get order by ID",
     tags,
-    security: [{ BearerAuth: [] }],
     request: { params: ParamOrderIdSchema },
     responses: {
       401: { description: "Unauthorized" },

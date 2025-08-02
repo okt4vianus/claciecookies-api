@@ -11,11 +11,9 @@ const tags = ["Checkout"];
 checkoutRoute.openapi(
   createRoute({
     tags,
-    summary:
-      "Get checkout page data (profile, cart, address, shipping-methods, payment-methods)",
+    summary: "Get checkout page data (profile, cart, address, shipping-methods, payment-methods)",
     method: "get",
     path: "/checkout",
-    security: [{ BearerAuth: [] }],
     responses: {
       401: { description: "Unauthorized" },
       200: {

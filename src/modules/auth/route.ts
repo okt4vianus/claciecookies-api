@@ -1,6 +1,5 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { prisma } from "~/lib/prisma";
-import { checkAuthorized } from "~/modules/auth/middleware";
 import { ErrorResponseSchema } from "~/modules/common/schema";
 import { PrivateUserProfileSchema, UserSchema } from "~/modules/user/schema";
 import { AddressesSchema } from "~/modules/address/schema";
@@ -17,7 +16,6 @@ authRoute.openapi(
     summary: "Get authenticated user profile",
     method: "get",
     path: "/me",
-    security: [{ BearerAuth: [] }],
     responses: {
       401: { description: "Unauthorized" },
       200: {
@@ -43,10 +41,7 @@ authRoute.openapi(
       return c.json(user, 200);
     } catch (error) {
       console.error("Error retrieving authenticated user:", error);
-      return c.json(
-        { message: "Failed to retrieve authenticated user", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve authenticated user", details: error }, 500);
     }
   }
 );
@@ -58,8 +53,6 @@ authRoute.openapi(
     summary: "Update user profile",
     method: "patch",
     path: "/profile",
-    security: [{ BearerAuth: [] }],
-    middleware: checkAuthorized,
     request: {
       body: {
         content: { "application/json": { schema: PrivateUserProfileSchema } },
@@ -93,7 +86,6 @@ authRoute.openapi(
     summary: "Get addresses of the auth user",
     method: "get",
     path: "/addresses",
-    security: [{ BearerAuth: [] }],
     responses: {
       401: { description: "Unauthorized" },
       200: {
@@ -129,10 +121,7 @@ authRoute.openapi(
 
       return c.json(addresses, 200);
     } catch (error) {
-      return c.json(
-        { message: "Failed to retrieve addresses", details: error },
-        500
-      );
+      return c.json({ message: "Failed to retrieve addresses", details: error }, 500);
     }
   }
 );
