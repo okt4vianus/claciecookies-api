@@ -1,9 +1,6 @@
-import { ShippingMethod } from "~/generated/prisma";
+import { ShippingMethod } from "@/generated/prisma";
 
-export type CreateShippingMethod = Pick<
-  ShippingMethod,
-  "name" | "slug" | "description" | "price"
->;
+export type CreateShippingMethod = Pick<ShippingMethod, "name" | "slug" | "description" | "price">;
 
 // Multiple shipping methods for seeding
 export const dataShippingMethods: CreateShippingMethod[] = [

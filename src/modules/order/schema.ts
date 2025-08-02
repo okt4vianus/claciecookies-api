@@ -1,5 +1,7 @@
 import { z } from "zod";
-import { OrderSchema as BaseOrderSchema } from "~/generated/zod";
+import { OrderSchema as BaseOrderSchema } from "@/generated/zod";
+import { PaymentMethodSchema } from "@/modules/payment-method/schema";
+import { AddressSchema } from "@/modules/address/schema";
 
 // Order Item Schema
 // TODO: Simplify by removing the ones already provided by generatod/zod
@@ -36,6 +38,8 @@ export const OrderSchema = BaseOrderSchema.extend({
   totalAmount: z.number().positive(),
   subtotalAmount: z.number().positive(),
   shippingCost: z.number().nonnegative(),
+  shippingAddress: AddressSchema,
+  paymentMethod: PaymentMethodSchema,
   orderItems: z.array(OrderItemSchema),
 });
 
@@ -52,14 +56,7 @@ export const OrderListSchema = z.array(OrderSchema);
 
 // Update Order Status Schema
 export const UpdateOrderStatusSchema = z.object({
-  status: z.enum([
-    "pending",
-    "confirmed",
-    "processing",
-    "shipped",
-    "delivered",
-    "cancelled",
-  ]),
+  status: z.enum(["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"]),
 });
 
 // Param Schema

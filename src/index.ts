@@ -3,16 +3,16 @@ import { Scalar } from "@scalar/hono-api-reference";
 import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 
-import { addressRoute } from "~/modules/address/route";
-import { cartRoute } from "~/modules/cart/route";
-import { productsRoute } from "~/modules/product/route";
-import { searchRoute } from "~/modules/search/route";
-import { usersRoute } from "~/modules/user/route";
-import { shippingMethodRoute } from "~/modules/shipping-method/route";
-import { paymentMethodRoute } from "~/modules/payment-method/route";
-import { ordersRoute } from "~/modules/order/route";
-import { auth } from "~/auth";
-import { authRoute } from "~/modules/auth/route";
+import { addressRoute } from "@/modules/address/route";
+import { cartRoute } from "@/modules/cart/route";
+import { productsRoute } from "@/modules/product/route";
+import { searchRoute } from "@/modules/search/route";
+import { usersRoute } from "@/modules/user/route";
+import { shippingMethodRoute } from "@/modules/shipping-method/route";
+import { paymentMethodRoute } from "@/modules/payment-method/route";
+import { ordersRoute } from "@/modules/order/route";
+import { auth } from "@/auth";
+import { authRoute } from "@/modules/auth/route";
 
 export type Env = {
   Variables: {
@@ -53,21 +53,21 @@ app.route("/orders", ordersRoute);
 app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 
 try {
-app
-  .doc("/openapi.json", {
-    openapi: "3.0.0",
-    info: {
-      version: "1.0.0",
-      title: "Clacie Cookies API",
-      description: "API Documentation for Clacie Cookies",
-    },
-  })
-  .openAPIRegistry.registerComponent("securitySchemes", "BearerAuth", {
-    type: "http",
-    scheme: "bearer",
-    in: "header",
-    description: "Bearer token for authentication",
-  });
+  app
+    .doc("/openapi.json", {
+      openapi: "3.0.0",
+      info: {
+        version: "1.0.0",
+        title: "Clacie Cookies API",
+        description: "API Documentation for Clacie Cookies",
+      },
+    })
+    .openAPIRegistry.registerComponent("securitySchemes", "BearerAuth", {
+      type: "http",
+      scheme: "bearer",
+      in: "header",
+      description: "Bearer token for authentication",
+    });
 } catch (error) {
   console.error("Failed to register OpenAPI doc:", error);
 }

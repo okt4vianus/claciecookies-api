@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { AddressSchema as BaseAddressSchema } from "~/generated/zod";
-import { phoneNumber } from "~/modules/common/schema";
+import { AddressSchema as BaseAddressSchema } from "@/generated/zod";
+import { phoneNumber } from "@/modules/common/schema";
 
 export const AddressSchema = BaseAddressSchema;
 
@@ -39,9 +39,7 @@ export const UpdateAddressSchema = z.object({
 
   notes: z.string().max(500).optional().or(z.literal("")),
 
-  isDefault: z
-    .union([z.boolean(), z.string().transform((v) => v === "true")])
-    .optional(),
+  isDefault: z.union([z.boolean(), z.string().transform((v) => v === "true")]).optional(),
 
   // opsional for peta/gps
   latitude: z.coerce.number().optional(),

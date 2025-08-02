@@ -1,10 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { createNewSlug } from "~/lib/slug";
-import {
-  ErrorResponseSchema,
-  SuccessResponseSchema,
-} from "~/modules/common/schema";
+import { prisma } from "@/lib/prisma";
+import { createNewSlug } from "@/lib/slug";
+import { ErrorResponseSchema, SuccessResponseSchema } from "@/modules/common/schema";
 import {
   CreateProductSchema,
   ManyProductsResponseSchema,
@@ -12,7 +9,7 @@ import {
   ParamProductIdentifierSchema,
   ParamProductIdSchema,
   UpsertProductSchema,
-} from "~/modules/product/schema";
+} from "@/modules/product/schema";
 
 export const productsRoute = new OpenAPIHono();
 
@@ -127,10 +124,7 @@ productsRoute.openapi(
 
       return c.json(product, 201);
     } catch (error) {
-      return c.json(
-        { error: "Failed to create new product", details: error },
-        500
-      );
+      return c.json({ error: "Failed to create new product", details: error }, 500);
     }
   }
 );
@@ -213,10 +207,7 @@ productsRoute.openapi(
       await prisma.product.deleteMany();
       return c.json({ message: "All products have been deleted" }, 200);
     } catch (error) {
-      return c.json(
-        { error: "Failed to delete products", details: error },
-        500
-      );
+      return c.json({ error: "Failed to delete products", details: error }, 500);
     }
   }
 );

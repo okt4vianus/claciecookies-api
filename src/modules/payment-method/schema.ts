@@ -1,4 +1,4 @@
-import { PaymentMethodSchema as BasePaymentMethodSchema } from "~/generated/zod";
+import { PaymentMethodSchema as BasePaymentMethodSchema } from "@/generated/zod";
 
 export const PaymentMethodSchema = BasePaymentMethodSchema;
 

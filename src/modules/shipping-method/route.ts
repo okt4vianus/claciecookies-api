@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ShippingMethodsSchema } from "~/modules/shipping-method/schema";
+import { prisma } from "@/lib/prisma";
+import { ShippingMethodsSchema } from "@/modules/shipping-method/schema";
 
 export const shippingMethodRoute = new OpenAPIHono();
 

@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ManyProductsResponseSchema } from "~/modules/product/schema";
-import { SearchQuerySchema } from "~/modules/search/schema";
+import { prisma } from "@/lib/prisma";
+import { ManyProductsResponseSchema } from "@/modules/product/schema";
+import { SearchQuerySchema } from "@/modules/search/schema";
 
 export const searchRoute = new OpenAPIHono();
 

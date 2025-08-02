@@ -1,14 +1,14 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { Env } from "~/index";
-import { prisma } from "~/lib/prisma";
+import { Env } from "@/index";
+import { prisma } from "@/lib/prisma";
 import {
   AddProductToCartSchema,
   CartItemSchema,
   CartSchema,
   ParamItemIdSchema,
   UpdateCartItemQuantitySchema,
-} from "~/modules/cart/schema";
-import { ErrorResponseSchema, ResponseStringSchema } from "~/modules/common/schema";
+} from "@/modules/cart/schema";
+import { ErrorResponseSchema, ResponseStringSchema } from "@/modules/common/schema";
 
 export const cartRoute = new OpenAPIHono<Env>();
 

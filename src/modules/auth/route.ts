@@ -1,9 +1,9 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ErrorResponseSchema } from "~/modules/common/schema";
-import { PrivateUserProfileSchema, UserSchema } from "~/modules/user/schema";
-import { AddressesSchema } from "~/modules/address/schema";
-import { Env } from "~/index";
+import { prisma } from "@/lib/prisma";
+import { ErrorResponseSchema } from "@/modules/common/schema";
+import { PrivateUserProfileSchema, UserSchema } from "@/modules/user/schema";
+import { AddressesSchema } from "@/modules/address/schema";
+import { Env } from "@/index";
 
 export const authRoute = new OpenAPIHono<Env>();
 
