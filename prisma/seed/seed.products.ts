@@ -1,5 +1,5 @@
-import { prisma } from "~/lib/prisma";
-import { dataProducts } from "~/modules/product/data";
+import { prisma } from "@/lib/prisma";
+import { dataProducts } from "@/modules/product/data";
 
 export async function seedProducts() {
   for (const dataProduct of dataProducts) {
@@ -16,9 +16,7 @@ export async function seedProducts() {
       include: { images: true },
     });
 
-    const imagesLog = upsertedProduct.images
-      .map((image) => image.name)
-      .join("\n \t\t");
+    const imagesLog = upsertedProduct.images.map((image) => image.name).join("\n \t\t");
 
     console.info(`
       🍪 Product: ${upsertedProduct.name} (${upsertedProduct.slug})

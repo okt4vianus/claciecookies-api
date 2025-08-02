@@ -1,9 +1,6 @@
-import { PaymentMethod } from "~/generated/prisma";
+import { PaymentMethod } from "@/generated/prisma";
 
-export type CreatePayment = Pick<
-  PaymentMethod,
-  "name" | "slug" | "description"
->;
+export type CreatePayment = Pick<PaymentMethod, "name" | "slug" | "description">;
 
 // Multiple payment methods for seeding
 export const dataPaymentMethods: CreatePayment[] = [

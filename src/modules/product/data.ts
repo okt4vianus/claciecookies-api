@@ -1,4 +1,4 @@
-import { ProductImage } from "~/modules/product-image/data";
+import { ProductImage } from "@/modules/product-image/data";
 
 export type Product = {
   slug: string; // unique slug for the product
@@ -144,8 +144,7 @@ export const dataProducts: Product[] = [
   {
     slug: "oreo-ice-cream-cheese-scones-cookies",
     name: "Oreo Ice Cream Cheese Scones Cookies",
-    description:
-      "Delightful Oreo, ice cream, and cheese scones in a cookie form",
+    description: "Delightful Oreo, ice cream, and cheese scones in a cookie form",
     price: 28000,
     stockQuantity: 5,
     images: [

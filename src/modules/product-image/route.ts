@@ -1,6 +1,6 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ProductImagesResponseSchema } from "~/modules/product-image/schema";
+import { prisma } from "@/lib/prisma";
+import { ProductImagesResponseSchema } from "@/modules/product-image/schema";
 
 export const productImagesRoute = new OpenAPIHono();
 

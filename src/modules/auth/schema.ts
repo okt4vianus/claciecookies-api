@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { UserSchema } from "~/modules/user/schema";
+import { UserSchema } from "@/modules/user/schema";
 
 export const AuthBodySchema = UserSchema.omit({
   id: true,

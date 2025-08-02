@@ -1,6 +1,6 @@
-import { auth } from "~/auth";
-import { prisma } from "~/lib/prisma";
-import { dataSeedUsers } from "~/modules/user/data";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { dataSeedUsers } from "@/modules/user/data";
 
 export async function seedUsers() {
   console.info("\n 🟢 Seeding users... \n");
@@ -13,9 +13,7 @@ export async function seedUsers() {
     });
 
     if (existingUser) {
-      console.info(
-        `ℹ️ User exists: ${existingUser.email} ${existingUser.name} @${existingUser.username}`
-      );
+      console.info(`ℹ️ User exists: ${existingUser.email} ${existingUser.name} @${existingUser.username}`);
       continue;
     }
 

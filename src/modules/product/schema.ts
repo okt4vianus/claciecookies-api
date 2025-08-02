@@ -1,10 +1,7 @@
 import { z } from "zod";
-import {
-  ProductImageSchema,
-  UpsertProductImageSchema,
-} from "~/modules/product-image/schema";
-import { ProductSchema as BaseProductSchema } from "~/generated/zod";
-import { stockQuantitySchema } from "~/modules/common/schema";
+import { ProductImageSchema, UpsertProductImageSchema } from "@/modules/product-image/schema";
+import { ProductSchema as BaseProductSchema } from "@/generated/zod";
+import { stockQuantitySchema } from "@/modules/common/schema";
 
 export const ProductSchema = BaseProductSchema.extend({
   name: z.string().min(3, "Name is required"),
@@ -12,8 +9,6 @@ export const ProductSchema = BaseProductSchema.extend({
   price: z.number().int().positive("Price must be a positive number"),
   stockQuantity: stockQuantitySchema,
   images: z.array(ProductImageSchema).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export const CreateProductSchema = ProductSchema.omit({

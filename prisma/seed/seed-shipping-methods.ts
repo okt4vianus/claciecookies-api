@@ -1,5 +1,5 @@
-import { prisma } from "~/lib/prisma";
-import { dataShippingMethods } from "~/modules/shipping-method/data";
+import { prisma } from "@/lib/prisma";
+import { dataShippingMethods } from "@/modules/shipping-method/data";
 
 export async function seedShippingMethods() {
   console.log("\n🚚 Seeding Shipping Methods...");

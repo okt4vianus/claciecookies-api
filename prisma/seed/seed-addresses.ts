@@ -1,5 +1,5 @@
-import { prisma } from "~/lib/prisma";
-import { dataAddresses } from "~/modules/user/data";
+import { prisma } from "@/lib/prisma";
+import { dataAddresses } from "@/modules/user/data";
 
 export async function seedAddresses() {
   console.log("\n🏠 Seeding Addresses...");

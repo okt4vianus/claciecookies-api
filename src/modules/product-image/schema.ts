@@ -1,12 +1,9 @@
 import { z } from "@hono/zod-openapi";
+import { ProductImageSchema as BaseProductImageSchema } from "@/generated/zod";
 
-export const ProductImageSchema = z.object({
-  id: z.string(),
+export const ProductImageSchema = BaseProductImageSchema.extend({
   name: z.string().min(3, "Name is required"),
   url: z.string().url("URL is required"),
-  productId: z.string(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
 });
 
 export const UpsertProductImageSchema = ProductImageSchema.pick({

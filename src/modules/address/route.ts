@@ -1,8 +1,8 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ErrorResponseSchema } from "~/modules/common/schema";
-import { AddressSchema, CreateAddressSchema, UpdateAddressSchema } from "~/modules/address/schema";
-import { Env } from "~/index";
+import { prisma } from "@/lib/prisma";
+import { ErrorResponseSchema } from "@/modules/common/schema";
+import { AddressSchema, CreateAddressSchema, UpdateAddressSchema } from "@/modules/address/schema";
+import { Env } from "@/index";
 
 export const addressRoute = new OpenAPIHono<Env>();
 

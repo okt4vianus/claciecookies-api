@@ -1,14 +1,11 @@
-import { Address, User } from "~/generated/prisma";
+import { Address, User } from "@/generated/prisma";
 
 // export type CreateUser = User;
 // export type CreateUser = Pick<User, "name" | "username" | "email"> & {
 //   password: string;
 // };
 
-export type SeedUser = Pick<
-  User,
-  "name" | "username" | "email" | "phoneNumber"
-> & {
+export type SeedUser = Pick<User, "name" | "username" | "email" | "phoneNumber"> & {
   password: string;
 };
 
@@ -39,10 +36,7 @@ export const dataSeedUsers: SeedUser[] = [
   },
 ];
 
-export type CreateAddress = Omit<
-  Address,
-  "id" | "userId" | "createdAt" | "updatedAt"
-> & {
+export type CreateAddress = Omit<Address, "id" | "userId" | "createdAt" | "updatedAt"> & {
   userEmail: string; // Will use email to find the user
 };
 

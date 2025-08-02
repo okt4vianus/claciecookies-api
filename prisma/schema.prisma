@@ -10,8 +10,9 @@ generator client {
 }
 
 generator zod {
-  provider = "zod-prisma-types"
-  output   = "../src/generated/zod"
+  provider   = "zod-prisma-types"
+  output     = "../src/generated/zod"
+  coerceDate = false
 }
 
 // ============================
@@ -303,14 +304,12 @@ model Order {
   status      OrderStatus @default(PENDING)
   orderNumber String      @unique // ORD-2025-001
 
-  // Customer Info
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  // Shipping-Address Info
   shippingAddressId String
   shippingAddress   Address @relation(fields: [shippingAddressId], references: [id])
-  notes             String  @default("") // Special instructions, can copy from shippingAddress.notes
+  notes             String  @default("")
 
   // TODO: Need to enable shippingMethod and model Courier
   // shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id]) // Express, etc
@@ -323,8 +322,6 @@ model Order {
   paymentMethodId String
   paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
 
-  // TODO: Detail for payment when there is payment gateway
-
   orderItems OrderItem[] // Copy CartItem into OrderItem
 
   // Pricing
@@ -333,6 +330,7 @@ model Order {
   discount     Int @default(0)
   totalAmount  Int
 
+  // TODO: Detail for payment when there is payment gateway
   // Use this when status has been changed
   paidAt      DateTime?
   confirmedAt DateTime?

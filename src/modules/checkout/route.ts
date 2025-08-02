@@ -1,8 +1,8 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { ErrorResponseSchema } from "~/modules/common/schema";
-import { CheckoutResponseSchema } from "~/modules/checkout/schema";
-import { Env } from "~/index";
+import { prisma } from "@/lib/prisma";
+import { ErrorResponseSchema } from "@/modules/common/schema";
+import { CheckoutResponseSchema } from "@/modules/checkout/schema";
+import { Env } from "@/index";
 
 export const checkoutRoute = new OpenAPIHono<Env>();
 const tags = ["Checkout"];
