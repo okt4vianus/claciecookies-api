@@ -1,10 +1,10 @@
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
-import { prisma } from "~/lib/prisma";
-import { createNewSlug } from "~/lib/slug";
+import { prisma } from "@/lib/prisma";
+import { createNewSlug } from "@/lib/slug";
 import {
   ErrorResponseSchema,
   SuccessResponseSchema,
-} from "~/modules/common/schema";
+} from "@/modules/common/schema";
 import {
   CreateProductSchema,
   ManyProductsResponseSchema,
@@ -12,7 +12,7 @@ import {
   ParamProductIdentifierSchema,
   ParamProductIdSchema,
   UpsertProductSchema,
-} from "~/modules/product/schema";
+} from "@/modules/product/schema";
 
 export const productsRoute = new OpenAPIHono();
 

@@ -1,8 +1,7 @@
 import { createMiddleware } from "hono/factory";
-import { User } from "~/generated/prisma";
-import { Env } from "~/index";
-import { prisma } from "~/lib/prisma";
-import { verifyToken } from "~/lib/token";
+import { Env } from "@/index";
+import { prisma } from "@/lib/prisma";
+import { verifyToken } from "@/lib/token";
 
 /**
  * UNUSED because of Better-Auth
