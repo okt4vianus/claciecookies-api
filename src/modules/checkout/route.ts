@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { CreateCheckoutBodySchema, GetCheckoutResponseSchema } from "@/modules/checkout/schema";
 import { Env } from "@/index";
 import { OrderSchema } from "@/modules/order/schema";
-import { ErrorResponseSchema } from "../common/schema";
+import { ErrorResponseSchema } from "@/modules/common/schema";
+import { AddressSchema } from "@/modules/address/schema";
+import { PrivateUserProfileSchema } from "@/modules/user/schema";
 
 export const checkoutRoute = new OpenAPIHono<Env>();
 const tags = ["Checkout"];
@@ -130,9 +132,14 @@ checkoutRoute.openapi(
       if (!shippingMethod) return c.json({ message: "Shipping method not found" }, 404);
       if (!paymentMethod) return c.json({ message: "Payment method not found" }, 404);
 
-      // TODO: Validate data completion of user and address
+      const userParssed = PrivateUserProfileSchema.safeParse(user);
+      if (!userParssed.success)
+        return c.json({ message: "Please complete customer information: full name, email address, phone number" }, 400);
 
-      // Finally create the order
+      const addressParsed = AddressSchema.safeParse(address);
+      if (!addressParsed.success) return c.json({ message: "Please complete address information" }, 400);
+
+      // TODO: Refactor into separate function
       const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
       const shippingCost = shippingMethod.price;
       const totalAmount = cart.totalPrice + shippingCost;
