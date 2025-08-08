@@ -13,6 +13,7 @@ import { paymentMethodRoute } from "@/modules/payment-method/route";
 import { ordersRoute } from "@/modules/order/route";
 import { auth } from "@/auth";
 import { authRoute } from "@/modules/auth/route";
+import { checkoutRoute } from "@/modules/checkout/route";
 
 export type Env = {
   Variables: {
@@ -48,6 +49,7 @@ app.route("/search", searchRoute); // model: Products
 app.route("/cart", cartRoute);
 app.route("/shipping-methods", shippingMethodRoute);
 app.route("/payment-methods", paymentMethodRoute);
+app.route("/checkout", checkoutRoute);
 app.route("/orders", ordersRoute);
 
 app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
