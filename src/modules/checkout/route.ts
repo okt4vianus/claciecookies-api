@@ -16,7 +16,7 @@ checkoutRoute.openapi(
     tags,
     summary: "Get checkout page data (profile, cart, address, shipping-methods, payment-methods)",
     method: "get",
-    path: "/checkout",
+    path: "/",
     responses: {
       401: { description: "Unauthorized" },
       200: {
@@ -90,7 +90,7 @@ checkoutRoute.openapi(
     summary:
       "Checkout to validate customer info, shipping address, shipping method, payment method; before create new order",
     method: "post",
-    path: "/checkout",
+    path: "/",
     request: { body: { content: { "application/json": { schema: CreateCheckoutBodySchema } } } },
     responses: {
       201: {
