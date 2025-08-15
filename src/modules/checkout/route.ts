@@ -105,6 +105,7 @@ checkoutRoute.openapi(
         description: "Successfully checked out and created new order",
         content: { "application/json": { schema: OrderSchema } },
       },
+      400: { description: "Error" },
       401: { description: "Unauthorized" },
       404: {
         content: { "application/json": { schema: ErrorResponseSchema } },
@@ -156,8 +157,16 @@ checkoutRoute.openapi(
         );
 
       const addressParsed = AddressSchema.safeParse(address);
-      if (!addressParsed.success)
-        return c.json({ message: "Please complete address information" }, 400);
+      if (!addressParsed.success) {
+        const errorMessages = addressParsed
+          .error!.issues.map((issue) => issue.message)
+          .join(", ");
+
+        return c.json(
+          { message: `Please complete your information: ${errorMessages}` },
+          400
+        );
+      }
 
       // TODO: Refactor into separate function
       const orderNumber = `ORD-${Date.now()}-${Math.random()
