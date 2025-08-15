@@ -167,6 +167,8 @@ model Address {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // @@index([id, userId])  //TODO: Migrate later
+
   @@unique([userId, label])
 }
 

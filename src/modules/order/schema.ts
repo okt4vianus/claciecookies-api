@@ -21,14 +21,6 @@ export const OrderSchema = BaseOrderSchema.extend({
   orderItems: z.array(OrderItemSchema),
 });
 
-// Create Order Schema (for POST request)
-export const CreateNewOrderSchema = z.object({
-  addressId: z.string(),
-  shippingMethodSlug: z.string(),
-  paymentMethodSlug: z.string(),
-  // User Profile and Latest Cart from database
-});
-
 // Order List Schema
 export const OrderListSchema = z.array(OrderSchema);
 
