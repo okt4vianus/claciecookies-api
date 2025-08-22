@@ -33,4 +33,9 @@ export const CreateAddressSchema = AddressSchema.omit({
   country: z.string().optional(),
 });
 
-export const UpdateAddressSchema = AddressSchema;
+export const UpdateAddressSchema = AddressSchema.omit({
+  userId: true,
+  isActive: true,
+  createdAt: true,
+  updatedAt: true,
+});
