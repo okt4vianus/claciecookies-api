@@ -10,10 +10,10 @@ export const AddressSchema = BaseAddressSchema.extend({
   street: z.string().min(10, "Street address is required"),
   city: z.string().min(3, "City is required"),
   province: z.string().min(5, "Province is required").default("Sulawesi Utara"),
-  postalCode: z.string().min(5, "Postal code must be at least 5 digits").max(5),
+  postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().default("Indonesia"),
-  landmark: z.string().max(255).optional().or(z.literal("")),
-  notes: z.string().max(500).optional().or(z.literal("")),
+  landmark: z.string().max(255).optional().nullable().or(z.literal("")),
+  notes: z.string().max(500).optional().nullable().or(z.literal("")),
   isDefault: z
     .union([z.boolean(), z.string().transform((v) => v === "true")])
     .optional(),
