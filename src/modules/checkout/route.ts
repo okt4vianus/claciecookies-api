@@ -8,7 +8,7 @@ import { Env } from "@/index";
 import { OrderSchema } from "@/modules/order/schema";
 import { ErrorResponseSchema } from "@/modules/common/schema";
 import { AddressSchema } from "@/modules/address/schema";
-import { PrivateUserProfileSchema } from "@/modules/user/schema";
+import { CheckoutUserSchema } from "@/modules/user/schema";
 
 export const checkoutRoute = new OpenAPIHono<Env>();
 const tags = ["Checkout"];
@@ -146,8 +146,9 @@ checkoutRoute.openapi(
       if (!paymentMethod)
         return c.json({ message: "Payment method not found" }, 404);
 
-      const userParssed = PrivateUserProfileSchema.safeParse(user);
-      if (!userParssed.success)
+      const userParsed = CheckoutUserSchema.safeParse(user);
+
+      if (!userParsed.success)
         return c.json(
           {
             message:
@@ -157,13 +158,18 @@ checkoutRoute.openapi(
         );
 
       const addressParsed = AddressSchema.safeParse(address);
+
+      console.log({ addressParsed });
+
       if (!addressParsed.success) {
         const errorMessages = addressParsed
           .error!.issues.map((issue) => issue.message)
           .join(", ");
 
         return c.json(
-          { message: `Please complete your information: ${errorMessages}` },
+          {
+            message: `Please complete order information: ${errorMessages}`,
+          },
           400
         );
       }

@@ -31,5 +31,12 @@ export const PrivateUserAddressSchema = UserSchema.extend({
   address: z.string(),
 });
 
+export const CheckoutUserSchema = BaseUserSchema.pick({
+  name: true,
+  email: true,
+}).extend({
+  phoneNumber: z.string(),
+});
+
 export type User = z.infer<typeof UserSchema>;
 export type Users = z.infer<typeof UsersSchema>;
