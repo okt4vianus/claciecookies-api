@@ -62,11 +62,15 @@ authRoute.openapi(
       },
     },
     responses: {
-      401: { description: "Unauthorized" },
       200: {
         description: "Successfully updated user",
         content: { "application/json": { schema: PrivateUserProfileSchema } },
       },
+      400: {
+        description: "Error",
+        content: { "application/json": { schema: ErrorResponseSchema } },
+      },
+      401: { description: "Unauthorized" },
     },
   }),
   async (c) => {
@@ -74,11 +78,48 @@ authRoute.openapi(
     if (!user) return c.text("Unauthorized", 401);
 
     const userData = c.req.valid("json");
-    const userProfile = await prisma.user.update({
-      where: { id: user.id },
-      data: userData,
-    });
-    return c.json(userProfile);
+
+    try {
+      const userProfile = await prisma.user.update({
+        where: { id: user.id },
+        data: userData,
+      });
+      return c.json(userProfile);
+    } catch (error: any) {
+      if (
+        error.code === "P2002" &&
+        error.meta &&
+        Array.isArray(error.meta.target)
+      ) {
+        if (error.meta.target.includes("email")) {
+          return c.json(
+            {
+              message: "Email already used by other user",
+              field: "email",
+              error: error,
+            },
+            400
+          );
+        }
+        if (error.meta.target.includes("phoneNumber")) {
+          return c.json(
+            {
+              message: "Phone number already used by other user",
+              field: "phoneNumber",
+              error: error,
+            },
+            400
+          );
+        }
+      }
+      return c.json(
+        {
+          message: "Failed to update user profile",
+          error: error?.message || error,
+        },
+        400
+      );
+    }
   }
 );
 
