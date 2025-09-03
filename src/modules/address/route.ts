@@ -48,7 +48,7 @@ addressRoute.openapi(
             userId: user.id,
             label: "Rumah",
             recipientName: user.name,
-            phoneNumber: user.phoneNumber || "+62",
+            phoneNumber: user.phoneNumber || "08",
             street: "",
             city: "",
             postalCode: "",

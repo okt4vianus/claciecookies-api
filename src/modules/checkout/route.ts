@@ -55,7 +55,7 @@ checkoutRoute.openapi(
             userId: user.id,
             label: "Rumah",
             recipientName: user.name,
-            phoneNumber: user.phoneNumber || "+62",
+            phoneNumber: user.phoneNumber || "08",
             street: "",
             city: "",
             postalCode: "",
@@ -108,8 +108,8 @@ checkoutRoute.openapi(
       400: { description: "Error" },
       401: { description: "Unauthorized" },
       404: {
-        content: { "application/json": { schema: ErrorResponseSchema } },
         description: "Cart not found",
+        content: { "application/json": { schema: ErrorResponseSchema } },
       },
       500: { description: "Server error" },
     },
