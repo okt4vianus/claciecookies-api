@@ -14,15 +14,15 @@ export const dataShippingMethods: CreateShippingMethod[] = [
     price: 50000,
   },
   {
-    name: "Express (1-2 business days)",
-    slug: "express",
-    description: "Fast shipping",
+    name: "Regular (1-2 business days)",
+    slug: "regular",
+    description: "Standard shipping",
     price: 25000,
   },
   {
-    name: "Regular (3-5 business days)",
-    slug: "regular",
-    description: "Standard shipping",
-    price: 15000,
+    name: "Self-Pickup",
+    slug: "self_pickup",
+    description: "Pick up your order directly from our store",
+    price: 0,
   },
 ];
